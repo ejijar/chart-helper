@@ -4346,12 +4346,17 @@
   width: 100%;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: 8px;
   color: var(--text);
   font-family: var(--mono);
-  font-size: 15px;
-  padding: 7px 8px;
+  font-size: 17px;
+  padding: 12px 8px;
   text-align: center;
+  min-height: 48px;
+  -webkit-appearance: none;
+}
+.cad-time-field input[type="time"]:not([value=""]):not(:placeholder-shown) {
+  border-color: var(--accent);
 }
 .cad-time-field input[type="time"]:focus { outline: none; border-color: var(--accent); }
 .cad-dest-row {
