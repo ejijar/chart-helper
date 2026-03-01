@@ -7159,6 +7159,7 @@ function checkCADSequence() {
   const applyBtn = document.getElementById('applyBtn');
   const hint = document.getElementById('cadSeqHint');
   let prev = null, prevLabel = '', error = '';
+  let wrapped = false; // once we cross midnight, all subsequent times need +1440
   fields.forEach(f => {
     const el = document.getElementById(f.id);
     if (el) el.style.borderColor = el.value.length === 5 ? 'var(--accent)' : '';
@@ -7168,12 +7169,15 @@ function checkCADSequence() {
     if (!el || el.value.length !== 5) continue;
     const mins = timeToMins(el.value);
     if (mins === null) continue;
-    let adj = mins;
-    if (prev !== null && adj < prev && Math.floor(prev/60)%24 === 23 && Math.floor(mins/60) === 0) adj += 1440;
+    let adj = wrapped ? mins + 1440 : mins;
+    // Detect midnight crossing: previous was 23:xx and current is 00:xx
+    if (prev !== null && !wrapped && Math.floor(prev/60)%24 === 23 && Math.floor(mins/60) === 0) {
+      wrapped = true;
+      adj = mins + 1440;
+    }
     if (prev !== null && adj < prev) {
       el.style.borderColor = 'var(--red, #ef4444)';
       if (!error) error = `${f.label} must be after ${prevLabel}`;
-      // don't update prev — keep comparing subsequent fields against last valid time
     } else {
       prev = adj; prevLabel = f.label;
     }
