@@ -1279,15 +1279,58 @@ function submitNote() {
 }
 
 function fmtTime(input) {
-  // Strip non-digits
-  let digits = input.value.replace(/\D/g, '');
-  // Auto-insert colon after 2 digits
-  if (digits.length > 2) {
-    digits = digits.slice(0, 2) + ':' + digits.slice(2, 4);
+  const raw = input.value.replace(/\D/g, '');
+  let filtered = '';
+  for (let i = 0; i < raw.length && i < 4; i++) {
+    const d = parseInt(raw[i]);
+    if (i === 0 && d > 2) break;
+    if (i === 1 && parseInt(raw[0]) === 2 && d > 3) break;
+    if (i === 2 && d > 5) break;
+    filtered += raw[i];
   }
-  input.value = digits;
-  // Highlight border when complete
-  input.style.borderColor = digits.length === 5 ? 'var(--accent)' : '';
+  input.value = filtered.length > 2 ? filtered.slice(0,2) + ':' + filtered.slice(2) : filtered;
+  input.style.borderColor = '';
+  checkCADSequence();
+}
+
+function timeToMins(t) {
+  if (!t || t.length !== 5) return null;
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function checkCADSequence() {
+  const fields = [
+    { id: 'tDisp', label: 'Dispatch' },
+    { id: 'tEnr',  label: 'Enroute' },
+    { id: 'tArv',  label: 'On Scene' },
+    { id: 'tDep',  label: 'Depart' },
+    { id: 'tHosp', label: 'Hospital' },
+    { id: 'tRts',  label: 'RTS' },
+  ];
+  const applyBtn = document.getElementById('applyBtn');
+  const hint = document.getElementById('cadSeqHint');
+  let prev = null, prevLabel = '', error = '';
+  fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (el) el.style.borderColor = el.value.length === 5 ? 'var(--accent)' : '';
+  });
+  for (const f of fields) {
+    const el = document.getElementById(f.id);
+    if (!el || el.value.length !== 5) continue;
+    const mins = timeToMins(el.value);
+    if (mins === null) continue;
+    let adj = mins;
+    if (prev !== null && adj < prev) adj += 1440;
+    if (prev !== null && adj < prev) {
+      el.style.borderColor = 'var(--red, #ef4444)';
+      error = `${f.label} must be after ${prevLabel}`;
+      break;
+    }
+    prev = adj; prevLabel = f.label;
+  }
+  if (hint) hint.textContent = error;
+  if (applyBtn) { applyBtn.disabled = !!error; applyBtn.style.opacity = error ? '0.4' : '1'; }
 }
 
 function bucketNow() {
