@@ -1060,15 +1060,9 @@ function switchTab(tab, el) {
   document.getElementById('tab-chart').style.display    = tab === 'chart'    ? 'block' : 'none';
   document.getElementById('tab-refusal').style.display  = tab === 'refusal'  ? 'block' : 'none';
 
-  // Show/hide capture bar and AI bar for On-Scene tab
+  // Show/hide capture bar for On-Scene tab
   const captureBar = document.getElementById('captureBarEl');
   if (captureBar) captureBar.classList.toggle('visible', tab === 'input');
-  const aiBar = document.getElementById('aiBar');
-  if (aiBar) aiBar.classList.toggle('visible', tab === 'input');
-  // Always show CAD summary bar on On-Scene tab
-  const cadSummary = document.getElementById('cadSummary');
-  if (cadSummary && tab === 'input') cadSummary.classList.add('visible');
-  if (cadSummary && tab !== 'input') cadSummary.classList.remove('visible');
 
   // Close drawer when leaving On-Scene tab
   if (tab !== 'input') {
@@ -1092,11 +1086,7 @@ let audioChunks = [];
 
 function toggleDrawer() {
   const drawer = document.getElementById('drawer');
-  const bar = document.getElementById('cadSummary');
-  if (drawer) {
-    drawer.classList.toggle('open');
-    if (bar) bar.classList.toggle('active');
-  }
+  if (drawer) drawer.classList.toggle('open');
 }
 
 function setMode(mode) {
@@ -1140,6 +1130,18 @@ function applyCAD() {
   cadData = data;
   showCADSummary(data);
   toggleDrawer();
+  // Add/update CAD card in bucket
+  bucketItems = bucketItems.filter(i => i.type !== 'cad');
+  const cadItem = {
+    id: Date.now(),
+    type: 'cad',
+    timestamp: bucketNow(),
+    stage: 'pre',
+    data
+  };
+  bucketItems.push(cadItem); // push to end (oldest position)
+  renderBucket();
+  updateAIBtn();
 }
 
 function showCADSummary(data) {
@@ -1312,15 +1314,19 @@ function renderBucket() {
   bucketItems.forEach(item => {
     const el = document.createElement('div');
     el.className = 'feed-item';
+    if (item.type === 'cad') {
+      el.onclick = toggleDrawer;
+      el.style.cursor = 'pointer';
+    }
     el.innerHTML = `
       <div class="feed-item-header">
         <span class="feed-item-icon">${getBucketIcon(item.type)}</span>
-        <span class="feed-item-type">${item.type}</span>
+        <span class="feed-item-type">${item.type === 'cad' ? 'CAD Times' : item.type}</span>
         ${item.stage ? `<span class="stage-badge">${item.stage}</span>` : ''}
         <span class="feed-item-time">${item.timestamp}</span>
-        <button class="feed-item-delete" onclick="deleteBucketItem(${item.id})" title="Remove">
+        ${item.type !== 'cad' ? `<button class="feed-item-delete" onclick="deleteBucketItem(${item.id})" title="Remove">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        </button>` : ''}
       </div>
       <div class="feed-item-body">${getBucketBody(item)}</div>`;
     bucket.appendChild(el);
@@ -1332,12 +1338,26 @@ function getBucketIcon(type) {
     note: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
     voice: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`,
     photo: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
-    pdf: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`
+    pdf: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+    cad: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
   };
   return icons[type] || '';
 }
 
 function getBucketBody(item) {
+  if (item.type === 'cad') {
+    const d = item.data;
+    const times = [
+      d.onScene ? `<div class="cad-card-item"><span class="cad-card-label">On Scene</span><span class="cad-card-value">${d.onScene}</span></div>` : '',
+      d.depart  ? `<div class="cad-card-item"><span class="cad-card-label">Depart</span><span class="cad-card-value">${d.depart}</span></div>` : '',
+      d.hospital? `<div class="cad-card-item"><span class="cad-card-label">Hospital</span><span class="cad-card-value">${d.hospital}</span></div>` : '',
+      d.rts     ? `<div class="cad-card-item"><span class="cad-card-label">RTS</span><span class="cad-card-value">${d.rts}</span></div>` : '',
+      d.dest    ? `<div class="cad-card-item"><span class="cad-card-label">Dest</span><span class="cad-card-value">${d.dest}</span></div>` : '',
+    ].filter(Boolean).join('');
+    const badge = d.isRefusal ? '<span class="cad-summary-badge badge-refusal">Refusal</span>' : '<span class="cad-summary-badge badge-transport">Transport</span>';
+    return `<div class="cad-card-grid">${times}</div><div style="margin-top:8px;">${badge}</div>
+    <div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--accent);">Tap to edit</div>`;
+  }
   if (item.type === 'note') {
     return `<div class="feed-note-text">${item.text}</div>`;
   }

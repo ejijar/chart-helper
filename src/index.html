@@ -379,12 +379,6 @@
       </div>
     </div>
 
-    <!-- CAD summary bar -->
-    <div class="cad-summary" id="cadSummary" onclick="toggleDrawer()" style="cursor:pointer;">
-      <div class="cad-summary-item">
-        <span class="cad-summary-label">On Scene</span>
-        <span class="cad-summary-value" id="sumArv">—</span>
-      </div>
       <div class="cad-summary-item">
         <span class="cad-summary-label">Depart</span>
         <span class="cad-summary-value" id="sumDep">—</span>
@@ -402,6 +396,15 @@
     </div>
 
     <!-- Bucket feed -->
+    <!-- Sticky AI Process bar -->
+    <div class="ai-bar-sticky" id="aiBar">
+      <button class="ai-process-btn" id="aiProcessBtn" onclick="processWithAI()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Process with AI
+        <span class="item-count-badge" id="aiItemCount" style="display:none">0</span>
+      </button>
+    </div>
+
     <div class="bucket" id="bucket">
       <div class="bucket-empty" id="bucketEmpty">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -426,14 +429,7 @@
     </div>
 
     <!-- Capture bar -->
-    <!-- AI Process bar -->
-    <div class="ai-bar" id="aiBar">
-      <button class="ai-process-btn" id="aiProcessBtn" onclick="processWithAI()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        Process with AI
-        <span class="item-count-badge" id="aiItemCount" style="display:none">0</span>
-      </button>
-    </div>
+
     <div class="capture-bar" id="captureBarEl">
       <button class="capture-btn" onclick="capturePhoto()" id="photoBtn">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

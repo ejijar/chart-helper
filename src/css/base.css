@@ -4414,51 +4414,42 @@
 .drawer-btn-primary:hover { background: var(--accent2); }
 .drawer-btn-secondary { background: var(--surface2); color: var(--text-muted); }
 .drawer-btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-.cad-summary {
-  display: none;
-  background: var(--surface2);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 16px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-.cad-summary.visible { display: flex; }
-.cad-summary:hover, .cad-summary.active { background: var(--surface); }
+/* cad-summary removed - now a feed card */
 /* AI bar */
-.ai-bar {
-  display: none;
-  position: fixed;
-  bottom: 88px;
-  left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px;
-  padding: 0 20px 8px;
-  z-index: 99;
+.ai-bar-sticky {
+  flex-shrink: 0;
+  padding: 10px 16px 6px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
 }
-.ai-bar.visible { display: block; }
-/* Override ai-process-btn inside ai-bar for larger tap target */
-.ai-bar .ai-process-btn {
+.ai-bar-sticky .ai-process-btn {
   width: 100%;
-  padding: 16px;
+  padding: 14px;
   font-size: 13px;
   font-weight: 600;
   border-radius: 10px;
   justify-content: center;
   gap: 10px;
 }
-.ai-bar .ai-process-btn.ready {
+.ai-bar-sticky .ai-process-btn.ready {
   background: rgba(249,115,22,0.12);
   border-color: var(--accent);
   color: var(--accent);
 }
-.ai-bar .item-count-badge {
+.ai-bar-sticky .item-count-badge {
   font-size: 11px;
   padding: 2px 9px;
   margin-left: 4px;
 }
+/* CAD card grid */
+.cad-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 8px;
+}
+.cad-card-item { display: flex; flex-direction: column; gap: 2px; }
+.cad-card-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+.cad-card-value { font-family: var(--mono); font-size: 14px; color: var(--text); }
 .cad-summary-item { display: flex; flex-direction: column; gap: 1px; }
 .cad-summary-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
 .cad-summary-value { color: var(--text); font-size: 12px; }
