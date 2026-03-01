@@ -1361,16 +1361,24 @@ function getBucketIcon(type) {
 function getBucketBody(item) {
   if (item.type === 'cad') {
     const d = item.data;
-    const times = [
-      d.onScene ? `<div class="cad-card-item"><span class="cad-card-label">On Scene</span><span class="cad-card-value">${d.onScene}</span></div>` : '',
-      d.depart  ? `<div class="cad-card-item"><span class="cad-card-label">Depart</span><span class="cad-card-value">${d.depart}</span></div>` : '',
-      d.hospital? `<div class="cad-card-item"><span class="cad-card-label">Hospital</span><span class="cad-card-value">${d.hospital}</span></div>` : '',
-      d.rts     ? `<div class="cad-card-item"><span class="cad-card-label">RTS</span><span class="cad-card-value">${d.rts}</span></div>` : '',
-      d.dest    ? `<div class="cad-card-item"><span class="cad-card-label">Dest</span><span class="cad-card-value">${d.dest}</span></div>` : '',
-    ].filter(Boolean).join('');
-    const badge = d.isRefusal ? '<span class="cad-summary-badge badge-refusal">Refusal</span>' : '<span class="cad-summary-badge badge-transport">Transport</span>';
-    return `<div class="cad-card-grid">${times}</div><div style="margin-top:8px;">${badge}</div>
-    <div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--accent);">Tap to edit</div>`;
+    const timeFields = [
+      { label: 'On Scene', val: d.onScene },
+      { label: 'Depart',   val: d.depart },
+      { label: 'Hospital', val: d.hospital },
+      { label: 'RTS',      val: d.rts },
+    ];
+    const times = timeFields.map(f =>
+      `<div class="cad-card-item">
+        <span class="cad-card-label">${f.label}</span>
+        <span class="cad-card-value ${f.val ? '' : 'cad-card-empty'}">${f.val || '--:--'}</span>
+      </div>`
+    ).join('');
+    const dest = d.dest ? `<div class="cad-card-item"><span class="cad-card-label">Dest</span><span class="cad-card-value">${d.dest}</span></div>` : '';
+    return `<div class="cad-card-grid">${times}${dest}</div>
+    <div class="cad-card-footer">
+      <span class="cad-tap-hint">⏱ Tap to set times</span>
+      <span class="cad-summary-badge ${d.isRefusal ? 'badge-refusal' : 'badge-transport'}">${d.isRefusal ? 'Refusal' : 'Transport'}</span>
+    </div>`;
   }
   if (item.type === 'note') {
     return `<div class="feed-note-text">${item.text}</div>`;

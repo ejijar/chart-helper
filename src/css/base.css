@@ -4449,6 +4449,15 @@
 }
 .cad-card-item { display: flex; flex-direction: column; gap: 2px; }
 .cad-card-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+.cad-card-empty { color: var(--text-dim); opacity: 0.4; }
+.cad-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px;
+}
+.cad-tap-hint {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--accent); opacity: 0.8;
+}
 .cad-card-value { font-family: var(--mono); font-size: 14px; color: var(--text); }
 .cad-summary-item { display: flex; flex-direction: column; gap: 1px; }
 .cad-summary-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
