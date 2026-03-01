@@ -15365,6 +15365,21 @@ function collectChartData() {
   // Collect reference photos (base64 + caption)
   data.refPhotos = refPhotos.map(p => ({ dataURL: p.dataURL, caption: p.caption }));
 
+  // Dispatch pills state
+  data.dispatchSex = document.getElementById('dispatchSex')?.value || '';
+  data.femaleMode = femaleMode;
+  data.pedsMode = pedsMode;
+  data.dispatchSexPillSelected = document.querySelector('#dispatchSexPills .tap-pill.selected')?.textContent.trim() || '';
+  data.dispatchAgePillSelected = document.querySelector('#dispatchAgePills .tap-pill.selected')?.textContent.trim() || '';
+
+  // Bucket items — strip audio blobs, keep transcripts and all other data
+  data.bucketItems = bucketItems.map(item => {
+    if (item.type === 'voice') {
+      return { ...item, url: null };
+    }
+    return { ...item };
+  });
+
   return data;
 }
 
@@ -15617,6 +15632,35 @@ function restoreChartData(data) {
   if (Array.isArray(data.refPhotos) && data.refPhotos.length) {
     refPhotos = data.refPhotos.map(p => ({ id: refNextId++, dataURL: p.dataURL, caption: p.caption || '' }));
     renderRefGrid();
+  }
+
+  // Restore dispatch pills state
+  if (data.dispatchSex) {
+    document.getElementById('dispatchSex').value = data.dispatchSex;
+    document.querySelectorAll('#dispatchSexPills .tap-pill').forEach(p => {
+      p.classList.toggle('selected', p.textContent.trim() === data.dispatchSexPillSelected);
+    });
+    femaleMode = data.femaleMode || false;
+  } else {
+    femaleMode = false;
+  }
+  if (data.dispatchAgePillSelected && data.dispatchAgePillSelected !== 'Adult') {
+    document.querySelectorAll('#dispatchAgePills .tap-pill').forEach(p => {
+      p.classList.toggle('selected', p.textContent.trim() === data.dispatchAgePillSelected);
+    });
+    pedsMode = data.pedsMode || false;
+  } else {
+    pedsMode = false;
+  }
+
+  // Re-render briefing with restored female/peds state
+  updateCallType();
+
+  // Restore bucket items
+  if (Array.isArray(data.bucketItems) && data.bucketItems.length) {
+    bucketItems = data.bucketItems.filter(item => item.type !== 'voice' || item.transcript);
+    renderBucket();
+    updateAIBtn();
   }
 
   return true;
