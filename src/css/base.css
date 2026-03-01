@@ -4467,6 +4467,15 @@
   min-height: 260px; gap: 12px; color: var(--text-dim);
 }
 .bucket-empty svg { opacity: 0.3; }
+.bucket-cad-btn {
+  margin-top: 16px;
+  display: flex; align-items: center; gap: 7px;
+  background: none; border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text-muted); font-family: var(--mono); font-size: 11px;
+  padding: 9px 16px; cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.bucket-cad-btn:hover { border-color: var(--accent); color: var(--accent); }
 .bucket-empty-text { font-family: var(--mono); font-size: 13px; text-align: center; line-height: 1.6; }
 .feed-item {
   background: var(--surface);
