@@ -1321,7 +1321,7 @@ function checkCADSequence() {
     const mins = timeToMins(el.value);
     if (mins === null) continue;
     let adj = mins;
-    if (prev !== null && adj < prev) adj += 1440;
+    if (prev !== null && adj < prev && Math.floor(prev/60)%24 === 23 && Math.floor(mins/60) === 0) adj += 1440;
     if (prev !== null && adj < prev) {
       el.style.borderColor = 'var(--red, #ef4444)';
       error = `${f.label} must be after ${prevLabel}`;
