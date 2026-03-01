@@ -1278,6 +1278,18 @@ function submitNote() {
   closeNote();
 }
 
+function fmtTime(input) {
+  // Strip non-digits
+  let digits = input.value.replace(/\D/g, '');
+  // Auto-insert colon after 2 digits
+  if (digits.length > 2) {
+    digits = digits.slice(0, 2) + ':' + digits.slice(2, 4);
+  }
+  input.value = digits;
+  // Highlight border when complete
+  input.style.borderColor = digits.length === 5 ? 'var(--accent)' : '';
+}
+
 function bucketNow() {
   const d = new Date();
   return d.getHours().toString().padStart(2,'0') + ':' +
