@@ -958,6 +958,7 @@ window.onload = function() {
   updateCallType();  // This will call initializeActivityCards
   setCurrentTimes();
   checkMicPermission();
+  initBucket();
 
   // Load and display any pending offline extractions
   loadQueue();
@@ -1079,6 +1080,19 @@ function switchTab(tab, el) {
 
 // ======== ON-SCENE CAPTURE TAB ========
 let bucketItems = [];
+
+function initBucket() {
+  // Add default empty CAD card
+  bucketItems = [{
+    id: 0,
+    type: 'cad',
+    timestamp: bucketNow(),
+    stage: '',
+    data: { onScene: '', depart: '', hospital: '', rts: '', dest: '', isRefusal: false }
+  }];
+  renderBucket();
+  updateAIBtn();
+}
 let cadData = null;
 let isCapturing = false;
 let mediaRecorder = null;
