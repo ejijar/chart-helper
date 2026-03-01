@@ -6966,13 +6966,13 @@ function applyCAD() {
   let data = {};
   if (mode === 'manual') {
     data = {
-      disp:     document.getElementById('tDisp').value,
-      enroute:  document.getElementById('tEnr').value,
-      arrival:  document.getElementById('tArv').value,
-      depart:   document.getElementById('tDep').value,
-      hospitalArrival: document.getElementById('isRefusal').checked ? null : document.getElementById('tHosp').value,
-      rts:      document.getElementById('tRts').value,
-      destination: document.getElementById('tDest').value,
+      disp:      document.getElementById('tDisp').value,
+      enroute:   document.getElementById('tEnr').value,
+      onScene:   document.getElementById('tArv').value,
+      depart:    document.getElementById('tDep').value,
+      hospital:  document.getElementById('isRefusal').checked ? null : document.getElementById('tHosp').value,
+      rts:       document.getElementById('tRts').value,
+      dest:      document.getElementById('tDest').value,
       isRefusal: document.getElementById('isRefusal').checked
     };
   } else {
@@ -6983,11 +6983,14 @@ function applyCAD() {
       return;
     }
   }
-  if (cadData) {
+  // Only warn if a previous CAD card has actual times filled in
+  const existingCAD = bucketItems.find(i => i.type === 'cad');
+  const hasExistingTimes = existingCAD && existingCAD.data &&
+    (existingCAD.data.onScene || existingCAD.data.depart || existingCAD.data.hospital || existingCAD.data.rts);
+  if (hasExistingTimes) {
     if (!confirm('CAD times are already set. Overwrite?')) return;
   }
   cadData = data;
-  showCADSummary(data);
   toggleDrawer();
   // Add/update CAD card in bucket
   bucketItems = bucketItems.filter(i => i.type !== 'cad');
