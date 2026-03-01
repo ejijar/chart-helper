@@ -1324,10 +1324,11 @@ function checkCADSequence() {
     if (prev !== null && adj < prev && Math.floor(prev/60)%24 === 23 && Math.floor(mins/60) === 0) adj += 1440;
     if (prev !== null && adj < prev) {
       el.style.borderColor = 'var(--red, #ef4444)';
-      error = `${f.label} must be after ${prevLabel}`;
-      break;
+      if (!error) error = `${f.label} must be after ${prevLabel}`;
+      // don't update prev — keep comparing subsequent fields against last valid time
+    } else {
+      prev = adj; prevLabel = f.label;
     }
-    prev = adj; prevLabel = f.label;
   }
   if (hint) hint.textContent = error;
   if (applyBtn) { applyBtn.disabled = !!error; applyBtn.style.opacity = error ? '0.4' : '1'; }

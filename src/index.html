@@ -325,27 +325,27 @@
           <div class="cad-time-grid">
             <div class="cad-time-field">
               <label>Disp</label>
-              <input type="text" inputmode="numeric" id="tDisp" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tDisp" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
             <div class="cad-time-field">
               <label>Enroute</label>
-              <input type="text" inputmode="numeric" id="tEnr" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tEnr" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
             <div class="cad-time-field">
               <label>On Scene</label>
-              <input type="text" inputmode="numeric" id="tArv" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tArv" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
             <div class="cad-time-field">
               <label>Depart</label>
-              <input type="text" inputmode="numeric" id="tDep" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tDep" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
             <div class="cad-time-field">
               <label>Hospital</label>
-              <input type="text" inputmode="numeric" id="tHosp" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tHosp" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
             <div class="cad-time-field">
               <label>RTS</label>
-              <input type="text" inputmode="numeric" id="tRts" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tRts" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
           </div>
           <div id="cadSeqHint" style="font-family:var(--mono);font-size:11px;color:var(--red,#ef4444);min-height:16px;margin-bottom:4px;padding:0 2px;"></div>

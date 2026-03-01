@@ -4940,27 +4940,27 @@
           <div class="cad-time-grid">
             <div class="cad-time-field">
               <label>Disp</label>
-              <input type="text" inputmode="numeric" id="tDisp" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tDisp" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
             <div class="cad-time-field">
               <label>Enroute</label>
-              <input type="text" inputmode="numeric" id="tEnr" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tEnr" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
             <div class="cad-time-field">
               <label>On Scene</label>
-              <input type="text" inputmode="numeric" id="tArv" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tArv" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
             <div class="cad-time-field">
               <label>Depart</label>
-              <input type="text" inputmode="numeric" id="tDep" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tDep" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
             <div class="cad-time-field">
               <label>Hospital</label>
-              <input type="text" inputmode="numeric" id="tHosp" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tHosp" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
             <div class="cad-time-field">
               <label>RTS</label>
-              <input type="text" inputmode="numeric" id="tRts" placeholder="--:--" maxlength="5" oninput="fmtTime(this)">
+              <input type="text" inputmode="numeric" id="tRts" placeholder="--:--" maxlength="5" oninput="fmtTime(this)" onblur="checkCADSequence()">
             </div>
           </div>
           <div id="cadSeqHint" style="font-family:var(--mono);font-size:11px;color:var(--red,#ef4444);min-height:16px;margin-bottom:4px;padding:0 2px;"></div>
@@ -7169,10 +7169,11 @@ function checkCADSequence() {
     if (prev !== null && adj < prev && Math.floor(prev/60)%24 === 23 && Math.floor(mins/60) === 0) adj += 1440;
     if (prev !== null && adj < prev) {
       el.style.borderColor = 'var(--red, #ef4444)';
-      error = `${f.label} must be after ${prevLabel}`;
-      break;
+      if (!error) error = `${f.label} must be after ${prevLabel}`;
+      // don't update prev — keep comparing subsequent fields against last valid time
+    } else {
+      prev = adj; prevLabel = f.label;
     }
-    prev = adj; prevLabel = f.label;
   }
   if (hint) hint.textContent = error;
   if (applyBtn) { applyBtn.disabled = !!error; applyBtn.style.opacity = error ? '0.4' : '1'; }
@@ -13301,6 +13302,32 @@ function _doClearChart() {
     if (stateEl) stateEl.value = 'CT';
     if (zipEl)   zipEl.value   = '06840';
 
+    // Clear CAD time inputs and reinitialize bucket
+    ['tDisp','tEnr','tArv','tDep','tHosp','tRts'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.value = ''; el.style.borderColor = ''; }
+    });
+    const cadDest = document.getElementById('tDest');
+    if (cadDest) cadDest.value = '';
+    const cadHint = document.getElementById('cadSeqHint');
+    if (cadHint) cadHint.textContent = '';
+    if (typeof initBucket === 'function') initBucket();
+    // Close drawer if open
+    const drawer = document.getElementById('drawer');
+    if (drawer) drawer.classList.remove('open');
+    // Close lightbox if open
+    const lightbox = document.getElementById('mediaLightbox');
+    if (lightbox) lightbox.classList.remove('open');
+    // Clear note textarea
+    const noteText = document.getElementById('noteText');
+    if (noteText) noteText.value = '';
+    // Stop any active bucket voice recording
+    if (typeof isCapturing !== 'undefined' && isCapturing) {
+      if (typeof mediaRecorder !== 'undefined' && mediaRecorder) mediaRecorder.stop();
+      isCapturing = false;
+      const voiceBtn = document.getElementById('voiceBtn');
+      if (voiceBtn) voiceBtn.classList.remove('recording');
+    }
     // Clear all signature canvases and reset undo/redo stacks
     ['sigPatient','sigWitness','sigRMA'].forEach(id => {
       sigHistory[id] = [];

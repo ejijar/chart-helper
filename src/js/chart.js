@@ -2700,6 +2700,32 @@ function _doClearChart() {
     if (stateEl) stateEl.value = 'CT';
     if (zipEl)   zipEl.value   = '06840';
 
+    // Clear CAD time inputs and reinitialize bucket
+    ['tDisp','tEnr','tArv','tDep','tHosp','tRts'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.value = ''; el.style.borderColor = ''; }
+    });
+    const cadDest = document.getElementById('tDest');
+    if (cadDest) cadDest.value = '';
+    const cadHint = document.getElementById('cadSeqHint');
+    if (cadHint) cadHint.textContent = '';
+    if (typeof initBucket === 'function') initBucket();
+    // Close drawer if open
+    const drawer = document.getElementById('drawer');
+    if (drawer) drawer.classList.remove('open');
+    // Close lightbox if open
+    const lightbox = document.getElementById('mediaLightbox');
+    if (lightbox) lightbox.classList.remove('open');
+    // Clear note textarea
+    const noteText = document.getElementById('noteText');
+    if (noteText) noteText.value = '';
+    // Stop any active bucket voice recording
+    if (typeof isCapturing !== 'undefined' && isCapturing) {
+      if (typeof mediaRecorder !== 'undefined' && mediaRecorder) mediaRecorder.stop();
+      isCapturing = false;
+      const voiceBtn = document.getElementById('voiceBtn');
+      if (voiceBtn) voiceBtn.classList.remove('recording');
+    }
     // Clear all signature canvases and reset undo/redo stacks
     ['sigPatient','sigWitness','sigRMA'].forEach(id => {
       sigHistory[id] = [];
