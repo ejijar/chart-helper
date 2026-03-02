@@ -3647,36 +3647,102 @@ const DISPATCH_BRIEFINGS = {
 
 async function processWithAI() {
   if (bucketItems.length === 0) { alert('Add some items to the record first.'); return; }
-  if (!hasAnthropicKey()) { alert('No API key set — open ⚙ Crew settings and enter your Anthropic API key (sk-ant-…), then tap Save.'); return; }
-  if (!isOnline()) { alert('You\'re offline — connect to the internet to process with AI.'); return; }
+  if (!hasAnthropicKey()) { alert('No API key set — open settings and enter your Anthropic API key.'); return; }
+  if (!isOnline()) { alert("You're offline — connect to the internet to process with AI."); return; }
 
   const btn = document.getElementById('aiProcessBtn');
   const originalHTML = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Processing…';
+
+  const progressBar = showAIProgress();
 
   try {
+    progressBar.update(5, 'Reading call data...');
     const chartState = collectChartData();
     const bucketSummary = buildBucketSummary();
     const userMessage = buildProcessingMessage(chartState, bucketSummary);
-    const responseText = await claudeAPI([{ role: 'user', content: userMessage }], 4096, EMS_SYSTEM_PROMPT);
+
+    progressBar.update(15, 'Sending to AI...');
+
+    let lastProgressAt = 15;
+
+    const responseText = await claudeAPIStream(
+      [{ role: 'user', content: userMessage }],
+      4096,
+      EMS_SYSTEM_PROMPT,
+      (fullText) => {
+        const estimatedProgress = Math.min(85, 15 + Math.floor((fullText.length / 3500) * 70));
+        if (estimatedProgress > lastProgressAt + 2) {
+          lastProgressAt = estimatedProgress;
+          let msg = 'Processing...';
+          if (estimatedProgress < 30) msg = 'Extracting patient information...';
+          else if (estimatedProgress < 45) msg = 'Analyzing scene and incident details...';
+          else if (estimatedProgress < 60) msg = 'Reviewing activity cards...';
+          else if (estimatedProgress < 75) msg = 'Building audit log...';
+          else msg = 'Finalizing chart...';
+          progressBar.update(estimatedProgress, msg);
+        }
+      }
+    );
+
+    progressBar.update(88, 'Populating chart fields...');
+
     let result;
     try {
-      const fenceMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
-      const clean = fenceMatch ? fenceMatch[1].trim() : responseText.trim();
+      const fenceMatch = responseText.match(/```(?:json)?[\s\S]*?```/);
+      const clean = fenceMatch ? responseText.match(/```(?:json)?\s*([\s\S]*?)```/)[1].trim() : responseText.trim();
       result = JSON.parse(clean);
     } catch(parseErr) { throw new Error('Claude returned invalid JSON. Try again.'); }
+
+    progressBar.update(95, 'Writing to chart...');
     const auditLog = applyAIResults(result, chartState);
+
+    progressBar.update(100, 'Complete!');
+    setTimeout(() => progressBar.hide(), 1000);
+
     outputAuditLog(auditLog, chartState.callType);
-    const populated = auditLog.filter(e => e.action !== 'skipped').length;
-    const skipped = auditLog.filter(e => e.action === 'skipped').length;
     addAIResultCard(auditLog, chartState.callType);
+
   } catch(err) {
+    progressBar.hide();
     showToast('error', 'AI Processing Failed', err.message);
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalHTML;
   }
+}
+
+function showAIProgress() {
+  let bar = document.getElementById('aiProgressBar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'aiProgressBar';
+    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;background:#111;border-bottom:1px solid #333;padding:10px 16px;font-family:var(--mono);font-size:12px;color:var(--text);';
+    bar.innerHTML =
+      '<div id="aiProgressMsg" style="margin-bottom:6px;color:var(--text-muted);">Preparing...</div>' +
+      '<div style="background:#222;border-radius:4px;height:6px;overflow:hidden;">' +
+      '<div id="aiProgressFill" style="height:100%;background:#f97316;width:0%;transition:width 0.3s ease;border-radius:4px;"></div>' +
+      '</div>';
+    document.body.appendChild(bar);
+  }
+  bar.style.display = 'block';
+  const fill = document.getElementById('aiProgressFill');
+  const msgEl = document.getElementById('aiProgressMsg');
+  if (fill) fill.style.width = '0%';
+  if (msgEl) msgEl.textContent = 'Preparing...';
+
+  return {
+    update(pct, msg) {
+      const f = document.getElementById('aiProgressFill');
+      const m = document.getElementById('aiProgressMsg');
+      if (f) f.style.width = pct + '%';
+      if (m) m.textContent = msg || '';
+    },
+    hide() {
+      const b = document.getElementById('aiProgressBar');
+      if (b) b.style.display = 'none';
+    }
+  };
 }
 
 function buildBucketSummary() {
