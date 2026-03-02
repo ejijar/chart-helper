@@ -4237,7 +4237,7 @@
 }
 @media (max-width: 500px) {
   #tab-input {
-    height: calc(100dvh - 115px);
+    height: calc(100dvh - 128px);
   }
 }
 #tab-input .bucket {
