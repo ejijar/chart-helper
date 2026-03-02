@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.31 -->
-<script>const APP_VERSION = 'v10.0.31';</script>
+<!-- Version: v10.0.32 -->
+<script>const APP_VERSION = 'v10.0.32';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css">
 </head>
@@ -414,14 +414,14 @@
     <!-- Capture bar -->
 
     <div class="capture-bar" id="captureBarEl">
-      <button class="capture-btn" onclick="capturePhoto();this.blur()" id="photoBtn">
+      <button class="capture-btn" onclick="capturePhoto();flashBtn(this)" id="photoBtn">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
           <circle cx="12" cy="13" r="4"/>
         </svg>
         Camera
       </button>
-      <button class="capture-btn" onclick="document.getElementById('photoUploadInput').click();this.blur()" id="uploadBtn">
+      <button class="capture-btn" onclick="document.getElementById('photoUploadInput').click();flashBtn(this)" id="uploadBtn">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
@@ -439,7 +439,7 @@
         Voice
         <span id="voiceBtnLabel" style="font-size:9px;display:none;color:var(--red);">STOP</span>
       </button>
-      <button class="capture-btn" onclick="openNote();this.blur()" id="noteBtn">
+      <button class="capture-btn" onclick="openNote();flashBtn(this)" id="noteBtn">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
           <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>

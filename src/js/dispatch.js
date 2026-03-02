@@ -1218,6 +1218,11 @@ function parseCADString(raw) {
   return parsed;
 }
 
+function flashBtn(btn) {
+  btn.classList.add('tapped');
+  setTimeout(() => btn.classList.remove('tapped'), 200);
+}
+
 function capturePhoto() {
   document.getElementById('photoInput').click();
 }
