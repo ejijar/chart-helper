@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.48 -->
-<script>const APP_VERSION = 'v10.0.48';</script>
+<!-- Version: v10.0.49 -->
+<script>const APP_VERSION = 'v10.0.49';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -15177,6 +15177,7 @@ async function loginUser() {
   sessionStorage.setItem('emsEncryptionKey', encryptionKey);
   
   document.getElementById('loginOverlay').style.display = 'none';
+  (function(){ var d = document.getElementById('tab-dispatch'); if(d){ var t = document.createElement('div'); d.appendChild(t); d.removeChild(t); } })();
   showToast('success', `Welcome back, ${username}!`, 'You are now signed in.');
 
   // Check for a recoverable auto-save from the previous session
@@ -15236,6 +15237,7 @@ async function signupUser() {
   sessionStorage.setItem('emsEncryptionKey', encryptionKey);
   
   document.getElementById('loginOverlay').style.display = 'none';
+  (function(){ var d = document.getElementById('tab-dispatch'); if(d){ var t = document.createElement('div'); d.appendChild(t); d.removeChild(t); } })();
   showToast('success', `Welcome, ${username}!`, 'Account created. Your password encrypts all patient data — keep it secure.');
   // New accounts won't have a prior auto-save, but check anyway for safety
   setTimeout(() => checkAutoRecover(username, password), 600);
