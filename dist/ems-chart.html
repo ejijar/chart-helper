@@ -15634,23 +15634,25 @@ function restoreChartData(data) {
     renderRefGrid();
   }
 
-  // Restore dispatch pills state
-  if (data.dispatchSex) {
-    document.getElementById('dispatchSex').value = data.dispatchSex;
-    document.querySelectorAll('#dispatchSexPills .tap-pill').forEach(p => {
-      p.classList.toggle('selected', p.textContent.trim() === data.dispatchSexPillSelected);
-    });
-    femaleMode = data.femaleMode || false;
-  } else {
-    femaleMode = false;
+  // Restore dispatch sex pill — use selectDispatchSex so femaleMode and patient sex sync correctly
+  femaleMode = false;
+  if (data.dispatchSexPillSelected) {
+    const sexPill = Array.from(document.querySelectorAll('#dispatchSexPills .tap-pill'))
+      .find(p => p.textContent.trim() === data.dispatchSexPillSelected);
+    if (sexPill) selectDispatchSex(sexPill, data.dispatchSex);
   }
-  if (data.dispatchAgePillSelected && data.dispatchAgePillSelected !== 'Adult') {
-    document.querySelectorAll('#dispatchAgePills .tap-pill').forEach(p => {
-      p.classList.toggle('selected', p.textContent.trim() === data.dispatchAgePillSelected);
-    });
-    pedsMode = data.pedsMode || false;
+  // Restore peds pill — default Adult is already selected in HTML; only act if Pediatric was saved
+  pedsMode = false;
+  document.querySelectorAll('#dispatchAgePills .tap-pill').forEach(p => p.classList.remove('selected'));
+  if (data.dispatchAgePillSelected === 'Pediatric') {
+    const pedsPill = Array.from(document.querySelectorAll('#dispatchAgePills .tap-pill'))
+      .find(p => p.textContent.trim() === 'Pediatric');
+    if (pedsPill) selectDispatchAge(pedsPill, 'pediatric');
   } else {
-    pedsMode = false;
+    // Default: Adult selected
+    const adultPill = Array.from(document.querySelectorAll('#dispatchAgePills .tap-pill'))
+      .find(p => p.textContent.trim() === 'Adult');
+    if (adultPill) adultPill.classList.add('selected');
   }
 
   // Re-render briefing with restored female/peds state
