@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.28 -->
-<script>const APP_VERSION = 'v10.0.28';</script>
+<!-- Version: v10.0.29 -->
+<script>const APP_VERSION = 'v10.0.29';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -7107,7 +7107,9 @@ async function toggleBucketVoice() {
     if (label) { label.textContent = 'STOP'; label.style.display = 'block'; }
 
     if (useWhisper()) {
-      // Whisper path — record then transcribe on stop
+      // Whisper path — show live "recording" card, transcribe on stop
+      const liveItem = addBucketItem({ type: 'voice', url: null, transcript: '', engine: 'Whisper', live: true });
+      const liveId = liveItem.id;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const mimeType = ['audio/mp4', 'audio/aac', 'audio/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '';
@@ -7118,7 +7120,7 @@ async function toggleBucketVoice() {
           stream.getTracks().forEach(t => t.stop());
           const blob = new Blob(audioChunks, { type: mimeType || 'audio/mp4' });
           audioChunks = [];
-          if (blob.size < 1000) return;
+          if (blob.size < 1000) { finalizeLiveBucketItem(liveId); return; }
           try {
             const ext = (mimeType.includes('webm') ? 'webm' : mimeType.includes('ogg') ? 'ogg' : 'mp4');
             const formData = new FormData();
@@ -7133,8 +7135,10 @@ async function toggleBucketVoice() {
             if (!resp.ok) throw new Error('Whisper error ' + resp.status);
             const data = await resp.json();
             const text = (data.text || '').trim();
-            if (text) addBucketItem({ type: 'voice', url: null, transcript: text, engine: 'Whisper' });
+            updateLiveBucketItem(liveId, text, '');
+            finalizeLiveBucketItem(liveId);
           } catch(err) {
+            finalizeLiveBucketItem(liveId);
             showToast('error', 'Transcription Failed', err.message);
           }
         };
@@ -7143,10 +7147,12 @@ async function toggleBucketVoice() {
         isCapturing = false;
         btn.classList.remove('recording');
         if (label) label.style.display = 'none';
+        bucketItems = bucketItems.filter(i => i.id !== liveId);
+        renderBucket();
         showToast('error', 'Microphone Error', e.message);
       }
     } else {
-      // WebSpeech path — live transcription, no audio saved
+      // WebSpeech path — live transcription card updates in real time
       if (!hasWebSpeech()) {
         showToast('error', 'Not Supported', 'Web Speech API not available on this device.');
         isCapturing = false;
@@ -7154,16 +7160,20 @@ async function toggleBucketVoice() {
         if (label) label.style.display = 'none';
         return;
       }
+      const liveItem = addBucketItem({ type: 'voice', url: null, transcript: '', engine: 'WebSpeech', live: true });
+      const liveId = liveItem.id;
       bucketVoiceLoop = makeWsLoop({
         isActive: () => isCapturing,
         onFinal: (text) => {
           bucketVoiceTranscript = (bucketVoiceTranscript + ' ' + text).trim();
+          updateLiveBucketItem(liveId, bucketVoiceTranscript, '');
         },
-        onInterim: () => {},
+        onInterim: (interim) => {
+          updateLiveBucketItem(liveId, bucketVoiceTranscript, interim);
+        },
         onDone: () => {
           bucketVoiceLoop = null;
-          const text = bucketVoiceTranscript.trim();
-          if (text) addBucketItem({ type: 'voice', url: null, transcript: text, engine: 'WebSpeech' });
+          finalizeLiveBucketItem(liveId);
           bucketVoiceTranscript = '';
         }
       });
@@ -7290,6 +7300,32 @@ function addBucketItem(item) {
   updateAIBtn();
   const bucket = document.getElementById('bucket');
   if (bucket) bucket.scrollTop = 0;
+  return item;
+}
+
+function updateLiveBucketItem(id, transcript, interim) {
+  const item = bucketItems.find(i => i.id === id);
+  if (!item) return;
+  item.transcript = transcript;
+  item.interim = interim || '';
+  // Re-render just this card's body
+  const bucket = document.getElementById('bucket');
+  if (!bucket) return;
+  const cards = bucket.querySelectorAll('.feed-item');
+  // Items are rendered in same order as bucketItems (unshifted, so first item = first card)
+  const idx = bucketItems.indexOf(item);
+  if (cards[idx]) {
+    const bodyEl = cards[idx].querySelector('.feed-item-body');
+    if (bodyEl) bodyEl.innerHTML = getBucketBody(item);
+  }
+}
+
+function finalizeLiveBucketItem(id) {
+  const item = bucketItems.find(i => i.id === id);
+  if (!item) return;
+  item.live = false;
+  item.interim = '';
+  updateLiveBucketItem(id, item.transcript, '');
 }
 
 function deleteBucketItem(id) {
@@ -7365,14 +7401,25 @@ function getBucketBody(item) {
     return `<div class="feed-note-text">${item.text}</div>`;
   }
   if (item.type === 'voice') {
-    // Transcribed voice — no audio blob, show transcript text only
     const engineLabel = item.engine ? item.engine : 'Transcribed';
+    const finalText = item.transcript || '';
+    const interimText = item.interim || '';
+    const liveIndicator = item.live
+      ? `<span class="feed-voice-live-dot"></span>`
+      : '';
+    const bodyHtml = finalText
+      ? `<div class="feed-transcript">${finalText}${interimText ? `<span class="feed-voice-interim"> ${interimText}</span>` : ''}</div>`
+      : interimText
+        ? `<div class="feed-transcript"><span class="feed-voice-interim">${interimText}</span></div>`
+        : item.live
+          ? `<div class="feed-transcript feed-voice-waiting">Listening…</div>`
+          : `<div class="feed-transcript"><em>No transcript</em></div>`;
     return `<div class="feed-voice-transcribed">
       <div class="feed-voice-header">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-        <span class="feed-voice-engine">${engineLabel}</span>
+        ${liveIndicator}<span class="feed-voice-engine">${engineLabel}</span>
       </div>
-      <div class="feed-transcript">${item.transcript || '<em>No transcript</em>'}</div>
+      ${bodyHtml}
     </div>`;
   }
   if (item.type === 'photo') {
