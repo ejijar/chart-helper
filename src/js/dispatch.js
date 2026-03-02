@@ -950,6 +950,9 @@ function stopLevelMeter() {
 window.onload = function() {
   console.log('[EMS] onload starting');
   window.scrollTo({ top: 0, behavior: 'instant' });
+  // Ensure spacer is visible on initial Dispatch tab load
+  const spacerEl = document.querySelector('.tabs-spacer');
+  if (spacerEl) spacerEl.style.display = '';
   
   // Check if user is logged in - if not, show login screen
   checkLogin();
@@ -1079,6 +1082,10 @@ function switchTab(tab, el) {
 
   // Scroll to top of page when switching tabs so content isn't hidden under sticky header/tabs
   window.scrollTo({ top: 0, behavior: 'instant' });
+
+  // Hide tabs-spacer for On-Scene (fixed-height flex container needs no gap)
+  const spacer = document.querySelector('.tabs-spacer');
+  if (spacer) spacer.style.display = tab === 'input' ? 'none' : '';
 }
 
 

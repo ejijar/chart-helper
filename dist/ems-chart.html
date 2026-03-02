@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.45 -->
-<script>const APP_VERSION = 'v10.0.45';</script>
+<!-- Version: v10.0.46 -->
+<script>const APP_VERSION = 'v10.0.46';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -245,6 +245,7 @@
   }
 
   .tabs-spacer { height: 20px; }
+  @media (max-width: 500px) { .tabs-spacer { height: 28px; } }
 
   .tab {
     flex: 1;
@@ -6810,6 +6811,9 @@ function stopLevelMeter() {
 window.onload = function() {
   console.log('[EMS] onload starting');
   window.scrollTo({ top: 0, behavior: 'instant' });
+  // Ensure spacer is visible on initial Dispatch tab load
+  const spacerEl = document.querySelector('.tabs-spacer');
+  if (spacerEl) spacerEl.style.display = '';
   
   // Check if user is logged in - if not, show login screen
   checkLogin();
@@ -6939,6 +6943,10 @@ function switchTab(tab, el) {
 
   // Scroll to top of page when switching tabs so content isn't hidden under sticky header/tabs
   window.scrollTo({ top: 0, behavior: 'instant' });
+
+  // Hide tabs-spacer for On-Scene (fixed-height flex container needs no gap)
+  const spacer = document.querySelector('.tabs-spacer');
+  if (spacer) spacer.style.display = tab === 'input' ? 'none' : '';
 }
 
 
