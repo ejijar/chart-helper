@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.61 -->
-<script>const APP_VERSION = 'v10.0.61';</script>
+<!-- Version: v10.0.46 -->
+<script>const APP_VERSION = 'v10.0.46';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -245,6 +245,7 @@
   }
 
   .tabs-spacer { height: 20px; }
+  @media (max-width: 500px) { .tabs-spacer { height: 28px; } }
 
   .tab {
     flex: 1;
@@ -2801,7 +2802,7 @@
 
     /* App container — full width, safe area insets */
     .app {
-      padding: 9px 12px 100px;
+      padding: 14px 12px 100px;
       max-width: 100%;
     }
 
@@ -6809,6 +6810,7 @@ function stopLevelMeter() {
 // ======== INIT ========
 window.onload = function() {
   console.log('[EMS] onload starting');
+  window.scrollTo({ top: 0, behavior: 'instant' });
   // Ensure spacer is visible on initial Dispatch tab load
   const spacerEl = document.querySelector('.tabs-spacer');
   if (spacerEl) spacerEl.style.display = '';
@@ -6862,7 +6864,6 @@ window.onload = function() {
   });
 
   console.log('[EMS] onload complete');
-
 };
 
 function checkMicPermission() {
@@ -15175,10 +15176,6 @@ async function loginUser() {
   
   document.getElementById('loginOverlay').style.display = 'none';
   showToast('success', `Welcome back, ${username}!`, 'You are now signed in.');
-  setTimeout(() => {
-    document.getElementById('tab-dispatch').style.display = 'none';
-    requestAnimationFrame(() => switchTab('dispatch', document.querySelectorAll('.tab')[0]));
-  }, 50);
 
   // Check for a recoverable auto-save from the previous session
   setTimeout(() => checkAutoRecover(username, password), 600);
@@ -15238,10 +15235,6 @@ async function signupUser() {
   
   document.getElementById('loginOverlay').style.display = 'none';
   showToast('success', `Welcome, ${username}!`, 'Account created. Your password encrypts all patient data — keep it secure.');
-  setTimeout(() => {
-    document.getElementById('tab-dispatch').style.display = 'none';
-    requestAnimationFrame(() => switchTab('dispatch', document.querySelectorAll('.tab')[0]));
-  }, 50);
   // New accounts won't have a prior auto-save, but check anyway for safety
   setTimeout(() => checkAutoRecover(username, password), 600);
 }
