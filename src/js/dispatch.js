@@ -1220,7 +1220,13 @@ function parseCADString(raw) {
 
 function flashBtn(btn) {
   btn.classList.add('tapped');
-  setTimeout(() => btn.classList.remove('tapped'), 200);
+  setTimeout(() => {
+    btn.classList.remove('tapped');
+    btn.blur();
+    // Force iOS to drop any touch/focus state
+    btn.style.pointerEvents = 'none';
+    setTimeout(() => { btn.style.pointerEvents = ''; }, 300);
+  }, 150);
 }
 
 function capturePhoto() {

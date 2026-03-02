@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.33 -->
-<script>const APP_VERSION = 'v10.0.33';</script>
+<!-- Version: v10.0.34 -->
+<script>const APP_VERSION = 'v10.0.34';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -7075,7 +7075,13 @@ function parseCADString(raw) {
 
 function flashBtn(btn) {
   btn.classList.add('tapped');
-  setTimeout(() => btn.classList.remove('tapped'), 200);
+  setTimeout(() => {
+    btn.classList.remove('tapped');
+    btn.blur();
+    // Force iOS to drop any touch/focus state
+    btn.style.pointerEvents = 'none';
+    setTimeout(() => { btn.style.pointerEvents = ''; }, 300);
+  }, 150);
 }
 
 function capturePhoto() {
