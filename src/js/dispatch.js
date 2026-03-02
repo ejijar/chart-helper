@@ -949,6 +949,7 @@ function stopLevelMeter() {
 // ======== INIT ========
 window.onload = function() {
   console.log('[EMS] onload starting');
+  window.scrollTo({ top: 0, behavior: 'instant' });
   
   // Check if user is logged in - if not, show login screen
   checkLogin();

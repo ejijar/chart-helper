@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.44 -->
-<script>const APP_VERSION = 'v10.0.44';</script>
+<!-- Version: v10.0.45 -->
+<script>const APP_VERSION = 'v10.0.45';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -4254,8 +4254,6 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
-  padding-top: 8px;
-  scroll-padding-top: 8px;
 }
 
 /* ── Media Lightbox ── */
@@ -6811,6 +6809,7 @@ function stopLevelMeter() {
 // ======== INIT ========
 window.onload = function() {
   console.log('[EMS] onload starting');
+  window.scrollTo({ top: 0, behavior: 'instant' });
   
   // Check if user is logged in - if not, show login screen
   checkLogin();

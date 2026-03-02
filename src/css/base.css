@@ -4244,8 +4244,6 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
-  padding-top: 8px;
-  scroll-padding-top: 8px;
 }
 
 /* ── Media Lightbox ── */
