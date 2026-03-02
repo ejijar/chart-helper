@@ -215,7 +215,7 @@
 
   @media (max-width: 500px) {
     .tabs-wrapper {
-      top: 55px; /* slightly shorter header on mobile */
+      top: 64px; /* match actual mobile header height */
       padding: 8px 12px;
       margin: 0 -12px;
     }
@@ -235,7 +235,7 @@
   }
 
   .tabs-spacer { height: 20px; }
-  @media (max-width: 500px) { .tabs-spacer { height: 28px; } }
+  @media (max-width: 500px) { .tabs-spacer { height: 0px; } }
 
   .tab {
     flex: 1;
@@ -4238,7 +4238,7 @@
 }
 @media (max-width: 500px) {
   #tab-input {
-    height: calc(100dvh - 128px);
+    height: calc(100dvh - 137px);
   }
 }
 #tab-input .bucket {
