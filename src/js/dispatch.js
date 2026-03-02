@@ -1483,7 +1483,14 @@ function addBucketItem(item) {
   renderBucket();
   updateAIBtn();
   const bucket = document.getElementById('bucket');
-  if (bucket) bucket.scrollTop = 0;
+  if (bucket) {
+    bucket.scrollTop = 0;
+    // Scroll the first feed item into view, clearing the sticky AI bar
+    setTimeout(() => {
+      const firstItem = bucket.querySelector('.feed-item');
+      if (firstItem) firstItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+  }
   return item;
 }
 
