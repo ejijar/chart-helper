@@ -1323,6 +1323,10 @@ async function toggleBucketVoice() {
           bucketVoiceLoop = null;
           finalizeLiveBucketItem(liveId);
           bucketVoiceTranscript = '';
+          // Force iOS Safari to release the mic indicator
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(s => { s.getTracks().forEach(t => t.stop()); })
+            .catch(() => {});
         }
       });
     }
