@@ -1357,11 +1357,29 @@ async function toggleBucketVoice() {
 }
 
 function openNote() {
-  document.getElementById('noteOverlay').classList.add('open');
+  const overlay = document.getElementById('noteOverlay');
+  overlay.classList.add('open');
   // Focus immediately — must be within the user gesture call stack for iOS Safari
   const ta = document.getElementById('noteText');
   ta.focus();
-  ta.click(); // belt-and-suspenders for iOS keyboard trigger
+
+  // Reposition sheet above keyboard using visualViewport API (iOS Safari)
+  function repositionNoteSheet() {
+    const sheet = overlay.querySelector('.note-sheet');
+    if (!sheet) return;
+    if (window.visualViewport) {
+      const offsetFromBottom = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
+      sheet.style.marginBottom = Math.max(0, offsetFromBottom) + 'px';
+    }
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', repositionNoteSheet);
+    window.visualViewport.addEventListener('scroll', repositionNoteSheet);
+    overlay._vpCleanup = () => {
+      window.visualViewport.removeEventListener('resize', repositionNoteSheet);
+      window.visualViewport.removeEventListener('scroll', repositionNoteSheet);
+    };
+  }
 }
 function closeNote() {
   document.getElementById('noteOverlay').classList.remove('open');
