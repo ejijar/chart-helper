@@ -3713,34 +3713,61 @@ async function processWithAI() {
 }
 
 function showAIProgress() {
-  let bar = document.getElementById('aiProgressBar');
-  if (!bar) {
-    bar = document.createElement('div');
-    bar.id = 'aiProgressBar';
-    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;background:#111;border-bottom:1px solid #333;padding:10px 16px;font-family:var(--mono);font-size:12px;color:var(--text);';
-    bar.innerHTML =
-      '<div id="aiProgressMsg" style="margin-bottom:6px;color:var(--text-muted);">Preparing...</div>' +
-      '<div style="background:#222;border-radius:4px;height:6px;overflow:hidden;">' +
-      '<div id="aiProgressFill" style="height:100%;background:#f97316;width:0%;transition:width 0.3s ease;border-radius:4px;"></div>' +
-      '</div>';
-    document.body.appendChild(bar);
+  const btn = document.getElementById('aiProcessBtn');
+  if (!btn) return { update() {}, hide() {} };
+
+  // Inject progress fill div if not present
+  if (!btn.querySelector('.ai-progress-fill')) {
+    const fill = document.createElement('div');
+    fill.className = 'ai-progress-fill';
+    btn.insertBefore(fill, btn.firstChild);
   }
-  bar.style.display = 'block';
-  const fill = document.getElementById('aiProgressFill');
-  const msgEl = document.getElementById('aiProgressMsg');
-  if (fill) fill.style.width = '0%';
-  if (msgEl) msgEl.textContent = 'Preparing...';
+
+  // Wrap existing content in a content span if not already
+  if (!btn.querySelector('.ai-btn-content')) {
+    const content = document.createElement('span');
+    content.className = 'ai-btn-content';
+    // Move all children except the fill into the content span
+    Array.from(btn.childNodes).forEach(node => {
+      if (!node.classList || !node.classList.contains('ai-progress-fill')) {
+        content.appendChild(node.cloneNode(true));
+      }
+    });
+    // Remove all children except fill
+    Array.from(btn.childNodes).forEach(node => {
+      if (!node.classList || !node.classList.contains('ai-progress-fill')) {
+        btn.removeChild(node);
+      }
+    });
+    btn.appendChild(content);
+  }
+
+  btn.classList.add('processing');
+  const fillEl = btn.querySelector('.ai-progress-fill');
+  const contentEl = btn.querySelector('.ai-btn-content');
+  if (fillEl) fillEl.style.width = '0%';
+  if (contentEl) contentEl.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Preparing...';
 
   return {
     update(pct, msg) {
-      const f = document.getElementById('aiProgressFill');
-      const m = document.getElementById('aiProgressMsg');
+      const f = btn.querySelector('.ai-progress-fill');
+      const c = btn.querySelector('.ai-btn-content');
       if (f) f.style.width = pct + '%';
-      if (m) m.textContent = msg || '';
+      if (c) c.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> ' + (msg || '');
     },
     hide() {
-      const b = document.getElementById('aiProgressBar');
-      if (b) b.style.display = 'none';
+      btn.classList.remove('processing');
+      const f = btn.querySelector('.ai-progress-fill');
+      if (f) f.style.width = '0%';
+      // Restore original button content
+      const c = btn.querySelector('.ai-btn-content');
+      if (c) {
+        // Unwrap content back into button
+        Array.from(c.childNodes).forEach(node => btn.insertBefore(node.cloneNode(true), c));
+        c.remove();
+      }
+      const fill = btn.querySelector('.ai-progress-fill');
+      if (fill) fill.remove();
     }
   };
 }

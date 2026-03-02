@@ -4620,6 +4620,32 @@
 }
 .ai-process-btn:hover { border-color: var(--accent); color: var(--accent); }
 .ai-process-btn.ready { background: rgba(249,115,22,0.1); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+/* AI button progress state */
+.ai-process-btn.processing {
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  background: rgba(249,115,22,0.08) !important;
+}
+.ai-process-btn.processing .ai-btn-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ai-process-btn .ai-progress-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 0%;
+  background: rgba(249,115,22,0.15);
+  transition: width 0.4s ease;
+  z-index: 1;
+  border-radius: 6px;
+}
+
 .item-count-badge { background: var(--accent); color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 10px; }
 .post-call-btn {
   display: flex; align-items: center; gap: 6px;
