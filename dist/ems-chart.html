@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.39 -->
-<script>const APP_VERSION = 'v10.0.39';</script>
+<!-- Version: v10.0.40 -->
+<script>const APP_VERSION = 'v10.0.40';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -4249,6 +4249,8 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  padding-top: 8px;
+  scroll-padding-top: 8px;
 }
 
 /* ── Media Lightbox ── */
@@ -7338,14 +7340,7 @@ function addBucketItem(item) {
   renderBucket();
   updateAIBtn();
   const bucket = document.getElementById('bucket');
-  if (bucket) {
-    bucket.scrollTop = 0;
-    // Scroll the first feed item into view, clearing the sticky AI bar
-    setTimeout(() => {
-      const firstItem = bucket.querySelector('.feed-item');
-      if (firstItem) firstItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 50);
-  }
+  if (bucket) bucket.scrollTop = 0;
   return item;
 }
 
