@@ -131,7 +131,7 @@ async function loginUser() {
   sessionStorage.setItem('emsEncryptionKey', encryptionKey);
   
   document.getElementById('loginOverlay').style.display = 'none';
-  (function(){ var d = document.getElementById('tab-dispatch'); if(d){ var t = document.createElement('div'); d.appendChild(t); d.removeChild(t); } })();
+  setTimeout(function(){ var d = document.getElementById('tab-dispatch'); if(d){ var t = document.createElement('div'); d.appendChild(t); d.removeChild(t); } }, 100);
   showToast('success', `Welcome back, ${username}!`, 'You are now signed in.');
 
   // Check for a recoverable auto-save from the previous session
@@ -191,7 +191,7 @@ async function signupUser() {
   sessionStorage.setItem('emsEncryptionKey', encryptionKey);
   
   document.getElementById('loginOverlay').style.display = 'none';
-  (function(){ var d = document.getElementById('tab-dispatch'); if(d){ var t = document.createElement('div'); d.appendChild(t); d.removeChild(t); } })();
+  setTimeout(function(){ var d = document.getElementById('tab-dispatch'); if(d){ var t = document.createElement('div'); d.appendChild(t); d.removeChild(t); } }, 100);
   showToast('success', `Welcome, ${username}!`, 'Account created. Your password encrypts all patient data — keep it secure.');
   // New accounts won't have a prior auto-save, but check anyway for safety
   setTimeout(() => checkAutoRecover(username, password), 600);
