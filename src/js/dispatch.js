@@ -1005,7 +1005,7 @@ window.onload = function() {
   // Call switchTab on load to ensure correct scroll position (same as New Chart does)
   setTimeout(() => {
     switchTab('dispatch', document.querySelectorAll('.tab')[0]);
-  }, 50);
+  }, 300);
 };
 
 function checkMicPermission() {
