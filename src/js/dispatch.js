@@ -1002,7 +1002,6 @@ window.onload = function() {
     }
   });
 
-  setTimeout(function() { var activeTab = document.querySelector('.tab.active'); if (activeTab) activeTab.click(); }, 50);
   console.log('[EMS] onload complete');
 };
 
@@ -1731,7 +1730,6 @@ function processWithAI() {
     const tag = (e.target || document.elementFromPoint(touchStartX, touchStartY))?.tagName?.toLowerCase();
     if (['input','select','textarea','button','canvas'].includes(tag)) return;
 
-    const activeTab = document.querySelector('.tab.active');
     const tabs = Array.from(document.querySelectorAll('.tab'));
     const currentIdx = tabs.indexOf(activeTab);
 
