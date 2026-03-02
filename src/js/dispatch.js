@@ -952,13 +952,10 @@ window.onload = function() {
   // Ensure spacer is visible on initial Dispatch tab load
   const spacerEl = document.querySelector('.tabs-spacer');
   if (spacerEl) spacerEl.style.display = '';
-  // Force Safari to recalculate sticky positioning on initial load
-  requestAnimationFrame(() => {
-    window.scrollTo({ top: 1, behavior: 'instant' });
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    });
-  });
+  // Scroll Dispatch first section into view on load to clear sticky tab bar
+  setTimeout(() => {
+    document.querySelector('#tab-dispatch .section')?.scrollIntoView();
+  }, 100);
   
   // Check if user is logged in - if not, show login screen
   checkLogin();
