@@ -952,10 +952,6 @@ window.onload = function() {
   // Ensure spacer is visible on initial Dispatch tab load
   const spacerEl = document.querySelector('.tabs-spacer');
   if (spacerEl) spacerEl.style.display = '';
-  // Scroll Dispatch first section into view on load to clear sticky tab bar
-  setTimeout(() => {
-    document.querySelector('#tab-dispatch .section')?.scrollIntoView();
-  }, 100);
   
   // Check if user is logged in - if not, show login screen
   checkLogin();
@@ -1006,6 +1002,10 @@ window.onload = function() {
   });
 
   console.log('[EMS] onload complete');
+  // Call switchTab on load to ensure correct scroll position (same as New Chart does)
+  setTimeout(() => {
+    switchTab('dispatch', document.querySelectorAll('.tab')[0]);
+  }, 50);
 };
 
 function checkMicPermission() {
