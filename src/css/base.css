@@ -235,7 +235,7 @@
   }
 
   .tabs-spacer { height: 20px; }
-  @media (max-width: 500px) { .tabs-spacer { height: 28px; } }
+  @media (max-width: 500px) { .tabs-spacer { height: 52px; } }
 
   .tab {
     flex: 1;
