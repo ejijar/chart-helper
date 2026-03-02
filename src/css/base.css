@@ -4232,7 +4232,7 @@
 /* On-Scene tab container layout */
 #tab-input {
   flex-direction: column;
-  height: calc(100vh - 100px);
+  height: calc(100dvh - 100px);
   overflow: hidden;
 }
 #tab-input .bucket {
