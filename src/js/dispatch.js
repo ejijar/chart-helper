@@ -1075,6 +1075,9 @@ function switchTab(tab, el) {
     prefillRefusalForm();
     setTimeout(initSignaturePads, 100);
   }
+
+  // Scroll to top of page when switching tabs so content isn't hidden under sticky header/tabs
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 
