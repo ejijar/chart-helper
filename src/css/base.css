@@ -235,6 +235,7 @@
   }
 
   .tabs-spacer { height: 20px; }
+  #tab-dispatch { padding-top: 8px; }
 
   .tab {
     flex: 1;
