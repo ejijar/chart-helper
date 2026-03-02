@@ -1358,7 +1358,10 @@ async function toggleBucketVoice() {
 
 function openNote() {
   document.getElementById('noteOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('noteText').focus(), 100);
+  // Focus immediately — must be within the user gesture call stack for iOS Safari
+  const ta = document.getElementById('noteText');
+  ta.focus();
+  ta.click(); // belt-and-suspenders for iOS keyboard trigger
 }
 function closeNote() {
   document.getElementById('noteOverlay').classList.remove('open');
