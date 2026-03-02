@@ -949,6 +949,7 @@ function stopLevelMeter() {
 // ======== INIT ========
 window.onload = function() {
   console.log('[EMS] onload starting');
+  window.scrollTo({ top: 0, behavior: 'instant' });
   // Ensure spacer is visible on initial Dispatch tab load
   const spacerEl = document.querySelector('.tabs-spacer');
   if (spacerEl) spacerEl.style.display = '';
@@ -1002,7 +1003,6 @@ window.onload = function() {
   });
 
   console.log('[EMS] onload complete');
-
 };
 
 function checkMicPermission() {

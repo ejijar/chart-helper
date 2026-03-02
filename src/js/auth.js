@@ -132,10 +132,6 @@ async function loginUser() {
   
   document.getElementById('loginOverlay').style.display = 'none';
   showToast('success', `Welcome back, ${username}!`, 'You are now signed in.');
-  setTimeout(() => {
-    document.getElementById('tab-dispatch').style.display = 'none';
-    requestAnimationFrame(() => switchTab('dispatch', document.querySelectorAll('.tab')[0]));
-  }, 50);
 
   // Check for a recoverable auto-save from the previous session
   setTimeout(() => checkAutoRecover(username, password), 600);
@@ -195,10 +191,6 @@ async function signupUser() {
   
   document.getElementById('loginOverlay').style.display = 'none';
   showToast('success', `Welcome, ${username}!`, 'Account created. Your password encrypts all patient data — keep it secure.');
-  setTimeout(() => {
-    document.getElementById('tab-dispatch').style.display = 'none';
-    requestAnimationFrame(() => switchTab('dispatch', document.querySelectorAll('.tab')[0]));
-  }, 50);
   // New accounts won't have a prior auto-save, but check anyway for safety
   setTimeout(() => checkAutoRecover(username, password), 600);
 }

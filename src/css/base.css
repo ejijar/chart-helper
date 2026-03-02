@@ -235,6 +235,7 @@
   }
 
   .tabs-spacer { height: 20px; }
+  @media (max-width: 500px) { .tabs-spacer { height: 28px; } }
 
   .tab {
     flex: 1;
@@ -2791,7 +2792,7 @@
 
     /* App container — full width, safe area insets */
     .app {
-      padding: 9px 12px 100px;
+      padding: 14px 12px 100px;
       max-width: 100%;
     }
 
