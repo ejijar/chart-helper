@@ -771,15 +771,17 @@ function restoreChartData(data) {
       .find(p => p.textContent.trim() === data.dispatchSexPillSelected);
     if (sexPill) selectDispatchSex(sexPill, data.dispatchSex);
   }
-  // Restore peds pill — default Adult is already selected in HTML; only act if Pediatric was saved
+  // Restore peds pill — clear all first, then set directly to avoid toggle-off trap
   pedsMode = false;
   document.querySelectorAll('#dispatchAgePills .tap-pill').forEach(p => p.classList.remove('selected'));
   if (data.dispatchAgePillSelected === 'Pediatric') {
+    pedsMode = true;
     const pedsPill = Array.from(document.querySelectorAll('#dispatchAgePills .tap-pill'))
       .find(p => p.textContent.trim() === 'Pediatric');
-    if (pedsPill) selectDispatchAge(pedsPill, 'pediatric');
+    if (pedsPill) pedsPill.classList.add('selected');
+    const container = document.getElementById('quickRefContainer');
+    if (container) container.classList.add('peds-active');
   } else {
-    // Default: Adult selected
     const adultPill = Array.from(document.querySelectorAll('#dispatchAgePills .tap-pill'))
       .find(p => p.textContent.trim() === 'Adult');
     if (adultPill) adultPill.classList.add('selected');
