@@ -4235,6 +4235,11 @@
   height: calc(100dvh - 100px);
   overflow: hidden;
 }
+@media (max-width: 500px) {
+  #tab-input {
+    height: calc(100dvh - 115px);
+  }
+}
 #tab-input .bucket {
   flex: 1;
   overflow-y: auto;
