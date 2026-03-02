@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.52 -->
-<script>const APP_VERSION = 'v10.0.52';</script>
+<!-- Version: v10.0.53 -->
+<script>const APP_VERSION = 'v10.0.53';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -6865,6 +6865,7 @@ window.onload = function() {
     }
   });
 
+  setTimeout(function() { var activeTab = document.querySelector('.tab.active'); if (activeTab) activeTab.click(); }, 50);
   console.log('[EMS] onload complete');
 };
 

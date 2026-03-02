@@ -1002,6 +1002,7 @@ window.onload = function() {
     }
   });
 
+  setTimeout(function() { var activeTab = document.querySelector('.tab.active'); if (activeTab) activeTab.click(); }, 50);
   console.log('[EMS] onload complete');
 };
 
