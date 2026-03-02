@@ -31,7 +31,12 @@ SCENE:
 - sceneNotes: scene description, environment, patient positioning, who was present
 
 INCIDENT:
-- chiefComplaint: patient's main complaint, quoted if possible
+- chiefComplaint: the main complaint, always in quotes with attribution. Rules:
+  * First person statement ("I fell") → format as: "I fell" - per patient
+  * Third person ("My son fell") → format as: "My son fell" - per [mother/father/bystander/etc]
+  * If unclear who said it → quote it and attribute as: "..." - per bystander
+  * Always include the quote marks and the "- per [source]" attribution
+  * Never paraphrase — use the actual words from the source material
 - hpiNarrative: OPQRST details
 - sampleNarrative: SAMPLE details including PMH, medications, allergies, last intake, events
 - medications: only if explicitly stated or visible in photo

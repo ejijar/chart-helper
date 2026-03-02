@@ -1546,10 +1546,10 @@ function renderBucket() {
     el.innerHTML = `
       <div class="feed-item-header">
         <span class="feed-item-icon">${getBucketIcon(item.type)}</span>
-        <span class="feed-item-type">${item.type === 'cad' ? 'CAD Times' : item.type}</span>
+        <span class="feed-item-type">${item.type === 'cad' ? 'CAD Times' : item.type === 'ai_result' ? 'AI Processed' : item.type}</span>
         ${item.stage ? `<span class="stage-badge">${item.stage}</span>` : ''}
         <span class="feed-item-time">${item.timestamp}</span>
-        ${item.type !== 'cad' ? `<button class="feed-item-delete" onclick="deleteBucketItem(${item.id})" title="Remove">
+        ${item.type !== 'cad' && item.type !== 'ai_result' ? `<button class="feed-item-delete" onclick="deleteBucketItem(${item.id})" title="Remove">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>` : ''}
       </div>
@@ -1564,7 +1564,8 @@ function getBucketIcon(type) {
     voice: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`,
     photo: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
     pdf: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
-    cad: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+    cad: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    ai_result: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`
   };
   return icons[type] || '';
 }
@@ -1590,6 +1591,14 @@ function getBucketBody(item) {
     <div class="cad-card-footer">
       <span class="cad-tap-hint">${hasAnyTime ? '✎ Tap to edit' : '⏱ Tap to set times'}</span>
       <span class="cad-summary-badge ${d.isRefusal ? 'badge-refusal' : 'badge-transport'}">${d.isRefusal ? 'Refusal' : 'Transport'}</span>
+    </div>`;
+  }
+  if (item.type === 'ai_result') {
+    return `<div class="feed-note-text" style="font-family:var(--mono);font-size:12px;line-height:1.6">
+      <span style="color:var(--success)">✓ ${item.populated} populated</span> if (item.type === 'note') {nbsp;·if (item.type === 'note') {nbsp;
+      <span style="color:var(--accent)">${item.updated} updated</span> if (item.type === 'note') {nbsp;·if (item.type === 'note') {nbsp;
+      <span style="color:var(--text-muted)">${item.skipped} skipped</span><br>
+      <span style="color:var(--text-dim)">Audit log attached to next chart email</span>
     </div>`;
   }
   if (item.type === 'note') {
@@ -3661,7 +3670,7 @@ async function processWithAI() {
     outputAuditLog(auditLog, chartState.callType);
     const populated = auditLog.filter(e => e.action !== 'skipped').length;
     const skipped = auditLog.filter(e => e.action === 'skipped').length;
-    showToast('success', 'AI Processing Complete', populated + ' field' + (populated !== 1 ? 's' : '') + ' populated. ' + skipped + ' skipped. Check audit log in next chart email.');
+    addAIResultCard(auditLog, chartState.callType);
   } catch(err) {
     showToast('error', 'AI Processing Failed', err.message);
   } finally {
@@ -3675,7 +3684,15 @@ function buildBucketSummary() {
   bucketItems.forEach(item => {
     const ts = item.timestamp ? '[' + item.timestamp + ']' : '';
     const stage = item.stage ? '(' + item.stage + ')' : '';
-    if (item.type === 'note') {
+    if (item.type === 'ai_result') {
+    return `<div class="feed-note-text" style="font-family:var(--mono);font-size:12px;line-height:1.6">
+      <span style="color:var(--success)">✓ ${item.populated} populated</span> if (item.type === 'note') {nbsp;·if (item.type === 'note') {nbsp;
+      <span style="color:var(--accent)">${item.updated} updated</span> if (item.type === 'note') {nbsp;·if (item.type === 'note') {nbsp;
+      <span style="color:var(--text-muted)">${item.skipped} skipped</span><br>
+      <span style="color:var(--text-dim)">Audit log attached to next chart email</span>
+    </div>`;
+  }
+  if (item.type === 'note') {
       parts.push('NOTE ' + ts + ' ' + stage + ':\n' + item.text);
     } else if (item.type === 'voice' && item.transcript && item.transcript.trim()) {
       parts.push('VOICE TRANSCRIPT ' + ts + ' ' + stage + ':\n' + item.transcript);
@@ -3755,7 +3772,7 @@ function applyAIResults(result, existingChart) {
     if (el) {
       el.value = p.patientSex;
       document.querySelectorAll('#sexPills .tap-pill').forEach(pill => {
-        pill.classList.toggle('active', pill.textContent.trim().toLowerCase() === p.patientSex);
+        pill.classList.toggle('selected', pill.textContent.trim().toLowerCase() === p.patientSex);
       });
       auditLog.push({ field: 'Patient Sex', action: 'populated', value: p.patientSex, source: 'explicit statement', reason: '' });
     }
@@ -3930,4 +3947,24 @@ function buildAuditEmailText(auditLog, callType, dateStr, timeStr) {
   L.push('(forward this thread to a Claude session to refine the AI prompt)');
   L.push('');
   return L.join('\n');
+}
+
+// ── AI Result bucket card ──
+function addAIResultCard(auditLog, callType) {
+  const populated = auditLog.filter(e => e.action === 'populated').length;
+  const updated   = auditLog.filter(e => e.action === 'updated').length;
+  const skipped   = auditLog.filter(e => e.action === 'skipped').length;
+  const item = {
+    id: Date.now(),
+    type: 'ai_result',
+    timestamp: bucketNow(),
+    stage: inferStage(bucketNow()),
+    populated, updated, skipped,
+    callType: callType || '(not set)'
+  };
+  bucketItems.unshift(item);
+  renderBucket();
+  updateAIBtn();
+  const bucket = document.getElementById('bucket');
+  if (bucket) bucket.scrollTop = 0;
 }
