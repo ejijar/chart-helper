@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.27 -->
-<script>const APP_VERSION = 'v10.0.27';</script>
+<!-- Version: v10.0.28 -->
+<script>const APP_VERSION = 'v10.0.28';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -4543,6 +4543,13 @@
   color: var(--text-muted); font-style: italic; line-height: 1.5;
   border-left: 2px solid var(--border); padding-left: 8px;
 }
+.feed-voice-transcribed { display: flex; flex-direction: column; gap: 6px; }
+.feed-voice-header {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent);
+}
+.feed-voice-engine { color: var(--text-dim); font-weight: 500; }
 .feed-photo-thumb {
   width: 100%; max-height: 180px; object-fit: cover; border-radius: 4px;
 }
@@ -7083,31 +7090,96 @@ function handlePhoto(e) {
   e.target.value = '';
 }
 
+// Bucket voice — transcribe on the fly using the same engine as the Chart tab.
+// Audio is never saved (HIPAA). Result lands in the bucket as a voice item with transcript text.
+let bucketVoiceTranscript = '';
+let bucketVoiceLoop = null;  // WebSpeech loop handle
+
 async function toggleBucketVoice() {
   const btn = document.getElementById('voiceBtn');
+  const label = document.getElementById('voiceBtnLabel');
+
   if (!isCapturing) {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mimeType = ['audio/mp4', 'audio/aac', 'audio/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '';
-      mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
-      audioChunks = [];
-      mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) audioChunks.push(e.data); };
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        addBucketItem({ type: 'voice', url, transcript: '' });
-        stream.getTracks().forEach(t => t.stop());
-      };
-      mediaRecorder.start(100);
-      isCapturing = true;
-      btn.classList.add('recording');
-    } catch(e) {
-      alert('Microphone access denied.');
+    // ── START ──
+    bucketVoiceTranscript = '';
+    isCapturing = true;
+    btn.classList.add('recording');
+    if (label) { label.textContent = 'STOP'; label.style.display = 'block'; }
+
+    if (useWhisper()) {
+      // Whisper path — record then transcribe on stop
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mimeType = ['audio/mp4', 'audio/aac', 'audio/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '';
+        mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) audioChunks.push(e.data); };
+        mediaRecorder.onstop = async () => {
+          stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(audioChunks, { type: mimeType || 'audio/mp4' });
+          audioChunks = [];
+          if (blob.size < 1000) return;
+          try {
+            const ext = (mimeType.includes('webm') ? 'webm' : mimeType.includes('ogg') ? 'ogg' : 'mp4');
+            const formData = new FormData();
+            formData.append('file', blob, 'audio.' + ext);
+            formData.append('model', 'whisper-1');
+            formData.append('language', 'en');
+            const resp = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + (settings.openaikey || '') },
+              body: formData
+            });
+            if (!resp.ok) throw new Error('Whisper error ' + resp.status);
+            const data = await resp.json();
+            const text = (data.text || '').trim();
+            if (text) addBucketItem({ type: 'voice', url: null, transcript: text, engine: 'Whisper' });
+          } catch(err) {
+            showToast('error', 'Transcription Failed', err.message);
+          }
+        };
+        mediaRecorder.start(100);
+      } catch(e) {
+        isCapturing = false;
+        btn.classList.remove('recording');
+        if (label) label.style.display = 'none';
+        showToast('error', 'Microphone Error', e.message);
+      }
+    } else {
+      // WebSpeech path — live transcription, no audio saved
+      if (!hasWebSpeech()) {
+        showToast('error', 'Not Supported', 'Web Speech API not available on this device.');
+        isCapturing = false;
+        btn.classList.remove('recording');
+        if (label) label.style.display = 'none';
+        return;
+      }
+      bucketVoiceLoop = makeWsLoop({
+        isActive: () => isCapturing,
+        onFinal: (text) => {
+          bucketVoiceTranscript = (bucketVoiceTranscript + ' ' + text).trim();
+        },
+        onInterim: () => {},
+        onDone: () => {
+          bucketVoiceLoop = null;
+          const text = bucketVoiceTranscript.trim();
+          if (text) addBucketItem({ type: 'voice', url: null, transcript: text, engine: 'WebSpeech' });
+          bucketVoiceTranscript = '';
+        }
+      });
     }
+
   } else {
-    mediaRecorder.stop();
+    // ── STOP ──
     isCapturing = false;
     btn.classList.remove('recording');
+    if (label) label.style.display = 'none';
+
+    if (useWhisper()) {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    } else {
+      if (bucketVoiceLoop) { bucketVoiceLoop.stop(); bucketVoiceLoop = null; }
+    }
   }
 }
 
@@ -7293,16 +7365,15 @@ function getBucketBody(item) {
     return `<div class="feed-note-text">${item.text}</div>`;
   }
   if (item.type === 'voice') {
-    const ticks = Array.from({length: 40}, () =>
-      `<div class="waveform-tick" style="height:${4 + Math.random()*18}px"></div>`
-    ).join('');
-    return `<div class="feed-voice-player">
-      <button class="play-btn" onclick="playBucketAudio('${item.url}')">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      </button>
-      <div class="voice-waveform-bar">${ticks}</div>
-    </div>
-    ${item.transcript ? `<div class="feed-transcript">${item.transcript}</div>` : ''}`;
+    // Transcribed voice — no audio blob, show transcript text only
+    const engineLabel = item.engine ? item.engine : 'Transcribed';
+    return `<div class="feed-voice-transcribed">
+      <div class="feed-voice-header">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <span class="feed-voice-engine">${engineLabel}</span>
+      </div>
+      <div class="feed-transcript">${item.transcript || '<em>No transcript</em>'}</div>
+    </div>`;
   }
   if (item.type === 'photo') {
     return `<div class="feed-photo-wrap" onclick="openMediaLightbox(${item.id})">

@@ -4533,6 +4533,13 @@
   color: var(--text-muted); font-style: italic; line-height: 1.5;
   border-left: 2px solid var(--border); padding-left: 8px;
 }
+.feed-voice-transcribed { display: flex; flex-direction: column; gap: 6px; }
+.feed-voice-header {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent);
+}
+.feed-voice-engine { color: var(--text-dim); font-weight: 500; }
 .feed-photo-thumb {
   width: 100%; max-height: 180px; object-fit: cover; border-radius: 4px;
 }
