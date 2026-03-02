@@ -950,9 +950,10 @@ function stopLevelMeter() {
 window.onload = function() {
   console.log('[EMS] onload starting');
   window.scrollTo({ top: 0, behavior: 'instant' });
-  // Ensure spacer is visible on initial Dispatch tab load
+  // Ensure spacer is visible and scroll to top on initial load
   const spacerEl = document.querySelector('.tabs-spacer');
   if (spacerEl) spacerEl.style.display = '';
+  setTimeout(() => switchTab('dispatch', null), 50);
 
 
   

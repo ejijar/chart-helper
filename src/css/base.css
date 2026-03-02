@@ -234,8 +234,7 @@
     margin-right: auto;
   }
 
-  .tabs-spacer { height: 0; }
-  #tab-dispatch { padding-top: 20px; }
+  .tabs-spacer { height: 16px; }
 
   .tab {
     flex: 1;
