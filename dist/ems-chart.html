@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.32 -->
-<script>const APP_VERSION = 'v10.0.32';</script>
+<!-- Version: v10.0.33 -->
+<script>const APP_VERSION = 'v10.0.33';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -4605,8 +4605,10 @@
   transition: all 0.15s; font-family: var(--mono); font-size: 10px;
   text-transform: uppercase; letter-spacing: 0.06em;
   -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 .capture-btn:hover, .capture-btn.tapped { border-color: var(--accent); color: var(--accent); background: rgba(249,115,22,0.08); }
+.capture-btn:focus { outline: none; border-color: var(--border); color: var(--text-muted); background: var(--surface2); }
 .capture-btn.recording { border-color: var(--red); color: var(--red); background: rgba(224,82,82,0.08); animation: pulse 1s infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
 .process-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
