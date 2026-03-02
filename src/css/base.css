@@ -237,7 +237,7 @@
   .tabs-spacer { height: 20px; }
   #tab-dispatch { scroll-margin-top: 120px; }
   #tab-dispatch { padding-top: 4px; }
-  @media (max-width: 500px) { .tabs-spacer { height: 28px; } }
+  @media (max-width: 500px) { .tabs-spacer { height: 16px; } }
 
   .tab {
     flex: 1;
