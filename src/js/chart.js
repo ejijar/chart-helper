@@ -2151,7 +2151,7 @@ function buildEmailText() {
 }
 
 function sendChartEmail() {
-  const body = buildEmailText();
+  const body = buildEmailText() + (window._lastAuditLog || "");
   const d = collectChartData();
   const address = [d.patientAddress, d.patientCity].filter(Boolean).join(', ') || 'Unknown Address';
   const dateStr = new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
@@ -2416,7 +2416,7 @@ function showNoKeyNote(statusElId) {
   el.style.cssText = 'color:var(--text-muted);font-size:11px;margin-top:4px;display:block';
 }
 
-async function claudeAPI(messages, max_tokens = 1000) {
+async function claudeAPI(messages, max_tokens = 1000, systemPrompt = null) {
   const apiKey = settings.apikey || '';
   if (!apiKey) {
     throw new Error('No API key set — open ⚙ Crew settings and enter your Anthropic API key (sk-ant-…), then tap Save.');
@@ -2436,6 +2436,7 @@ async function claudeAPI(messages, max_tokens = 1000) {
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens,
+      ...(systemPrompt ? { system: systemPrompt } : {}),
       messages,
     })
   });

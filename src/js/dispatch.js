@@ -1698,7 +1698,7 @@ function updateAIBtn() {
   btn.classList.toggle('ready', bucketItems.length > 0);
 }
 
-function processWithAI() {
+function processWithAI_REPLACED() {
   if (bucketItems.length === 0) { alert('Add some items to the record first.'); return; }
   alert(`Ready to process ${bucketItems.length} item(s) with AI.\n\n(AI pipeline integration coming next.)`);
 }
@@ -3631,3 +3631,303 @@ const DISPATCH_BRIEFINGS = {
   }
 
 };
+
+// ============================================================
+// processWithAI() — AI pipeline (replaces stub above)
+// ============================================================
+
+async function processWithAI() {
+  if (bucketItems.length === 0) { alert('Add some items to the record first.'); return; }
+  if (!hasAnthropicKey()) { alert('No API key set — open ⚙ Crew settings and enter your Anthropic API key (sk-ant-…), then tap Save.'); return; }
+  if (!isOnline()) { alert('You\'re offline — connect to the internet to process with AI.'); return; }
+
+  const btn = document.getElementById('aiProcessBtn');
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Processing…';
+
+  try {
+    const chartState = collectChartData();
+    const bucketSummary = buildBucketSummary();
+    const userMessage = buildProcessingMessage(chartState, bucketSummary);
+    const responseText = await claudeAPI([{ role: 'user', content: userMessage }], 4096, EMS_SYSTEM_PROMPT);
+    let result;
+    try {
+      const fenceMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
+      const clean = fenceMatch ? fenceMatch[1].trim() : responseText.trim();
+      result = JSON.parse(clean);
+    } catch(parseErr) { throw new Error('Claude returned invalid JSON. Try again.'); }
+    const auditLog = applyAIResults(result, chartState);
+    outputAuditLog(auditLog, chartState.callType);
+    const populated = auditLog.filter(e => e.action !== 'skipped').length;
+    const skipped = auditLog.filter(e => e.action === 'skipped').length;
+    showToast('success', 'AI Processing Complete', populated + ' field' + (populated !== 1 ? 's' : '') + ' populated. ' + skipped + ' skipped. Check audit log in next chart email.');
+  } catch(err) {
+    showToast('error', 'AI Processing Failed', err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHTML;
+  }
+}
+
+function buildBucketSummary() {
+  const parts = [];
+  bucketItems.forEach(item => {
+    const ts = item.timestamp ? '[' + item.timestamp + ']' : '';
+    const stage = item.stage ? '(' + item.stage + ')' : '';
+    if (item.type === 'note') {
+      parts.push('NOTE ' + ts + ' ' + stage + ':\n' + item.text);
+    } else if (item.type === 'voice' && item.transcript && item.transcript.trim()) {
+      parts.push('VOICE TRANSCRIPT ' + ts + ' ' + stage + ':\n' + item.transcript);
+    } else if (item.type === 'cad') {
+      const d = item.data || {};
+      const cadLines = ['CAD DATA:'];
+      if (d.disp)      cadLines.push('  Dispatch time: ' + d.disp);
+      if (d.enroute)   cadLines.push('  Enroute time: ' + d.enroute);
+      if (d.onScene)   cadLines.push('  On-scene time: ' + d.onScene);
+      if (d.depart)    cadLines.push('  Depart time: ' + d.depart);
+      if (d.hospital)  cadLines.push('  Hospital arrival time: ' + d.hospital);
+      if (d.rts)       cadLines.push('  Return to service time: ' + d.rts);
+      if (d.dest)      cadLines.push('  Destination: ' + d.dest);
+      if (d.isRefusal) cadLines.push('  REFUSAL CALL');
+      parts.push(cadLines.join('\n'));
+    } else if (item.type === 'photo') {
+      parts.push('PHOTO ' + ts + ' ' + stage + ': "' + (item.caption || 'no caption') + '" — [image]');
+    } else if (item.type === 'pdf') {
+      parts.push('PDF ' + ts + ' ' + stage + ': "' + (item.caption || 'document') + '"');
+    }
+  });
+  return parts.join('\n\n---\n\n');
+}
+
+function buildProcessingMessage(chartState, bucketSummary) {
+  const existing = [];
+  ['patientName','patientDOB','patientAge','patientSex','patientAddress','patientCity','patientPhone','patientLOC','sceneNotes','chiefComplaint','hpiNarrative','sampleNarrative','medications','allergies'].forEach(f => {
+    if (chartState[f] && chartState[f].trim()) existing.push(f);
+  });
+  const cardSummary = (chartState.vitalsCards || []).map(c => {
+    const hasData = c.bp || c.hr || c.rr || c.spo2 || c.activity;
+    return 'Card ' + c.id + ' "' + c.label + '": ' + (hasData ? 'has some data' : 'empty');
+  }).join('\n');
+  return 'CALL TYPE: ' + (chartState.callType || 'not set') + '\n\nFIELDS ALREADY CONTAINING DATA (do not overwrite unless clearly more accurate):\n' + (existing.length ? existing.join(', ') : 'None') + '\n\nCURRENT ACTIVITY CARDS:\n' + (cardSummary || 'No cards') + '\n\n═══════════════════════════════\nRAW CALL DATA\n═══════════════════════════════\n' + (bucketSummary || '(no bucket items)') + '\n\nReturn JSON only.';
+}
+
+function applyAIResults(result, existingChart) {
+  const auditLog = [];
+
+  const setField = (id, value, fieldLabel, source) => {
+    if (!value || !value.toString().trim()) {
+      auditLog.push({ field: fieldLabel, action: 'skipped', value: null, source: source || 'not found', reason: 'No value returned by Claude' });
+      return;
+    }
+    const el = document.getElementById(id);
+    if (!el) return;
+    const existing = el.value && el.value.trim();
+    el.value = value.toString().trim();
+    auditLog.push({ field: fieldLabel, action: existing ? 'updated' : 'populated', value: value.toString().trim(), source: source || 'AI extraction', reason: existing ? 'Overwrote: "' + existing + '"' : 'Field was empty' });
+  };
+
+  const appendField = (id, value, fieldLabel, source) => {
+    if (!value || !value.toString().trim()) {
+      auditLog.push({ field: fieldLabel, action: 'skipped', value: null, source: source || 'not found', reason: 'No value returned by Claude' });
+      return;
+    }
+    const el = document.getElementById(id);
+    if (!el) return;
+    const existing = el.value && el.value.trim();
+    el.value = existing ? existing + '\n' + value.toString().trim() : value.toString().trim();
+    if (typeof autoResizeTextarea === 'function') autoResizeTextarea(el);
+    auditLog.push({ field: fieldLabel, action: existing ? 'updated' : 'populated', value: value.toString().trim(), source: source || 'AI extraction', reason: existing ? 'Appended to existing' : 'Field was empty' });
+  };
+
+  const p = result.patient || {};
+  setField('patientName',    p.patientName,    'Patient Name',    'patient info');
+  setField('patientDOB',     p.patientDOB,     'Patient DOB',     'patient info');
+  setField('patientAge',     p.patientAge,     'Patient Age',     'patient info');
+  setField('patientAddress', p.patientAddress, 'Patient Address', 'patient info');
+  setField('patientCity',    p.patientCity,    'Patient City',    'patient info');
+  setField('patientState',   p.patientState,   'Patient State',   'patient info');
+  setField('patientZip',     p.patientZip,     'Patient Zip',     'patient info');
+  setField('patientPhone',   p.patientPhone,   'Patient Phone',   'patient info');
+
+  if (p.patientSex === 'male' || p.patientSex === 'female') {
+    const el = document.getElementById('patientSex');
+    if (el) {
+      el.value = p.patientSex;
+      document.querySelectorAll('#sexPills .tap-pill').forEach(pill => {
+        pill.classList.toggle('active', pill.textContent.trim().toLowerCase() === p.patientSex);
+      });
+      auditLog.push({ field: 'Patient Sex', action: 'populated', value: p.patientSex, source: 'explicit statement', reason: '' });
+    }
+  } else {
+    auditLog.push({ field: 'Patient Sex', action: 'skipped', value: null, source: 'not found', reason: 'Not explicitly stated' });
+  }
+
+  const d = result.dispatch || {};
+  if (d.callType) {
+    const el = document.getElementById('callType');
+    if (el) { el.value = d.callType; if (typeof updateCallType === 'function') updateCallType(); }
+    auditLog.push({ field: 'Call Type', action: 'populated', value: d.callType, source: 'inference', reason: '' });
+  } else {
+    auditLog.push({ field: 'Call Type', action: 'skipped', value: null, source: 'not found', reason: 'Could not determine call type' });
+  }
+  setField('incidentLocation', d.incidentLocation, 'Incident Location', 'CAD or dictation');
+  setField('whoCalled911',     d.whoCalled911,     'Who Called 911',    'dictation');
+
+  const sc = result.scene || {};
+  const validLOC = ['Alert and Oriented x4','Alert and Oriented x3','Alert and Oriented x2','Alert and Oriented x1','Altered Mental Status','Unconscious'];
+  if (sc.patientLOC && validLOC.includes(sc.patientLOC)) {
+    const el = document.getElementById('patientLOC');
+    if (el) {
+      el.value = sc.patientLOC;
+      document.querySelectorAll('#locAlertPills .tap-pill').forEach(pill => {
+        const txt = pill.textContent.trim();
+        const match = (txt === 'Alert' && sc.patientLOC.startsWith('Alert')) ||
+                      (txt === 'Altered' && sc.patientLOC === 'Altered Mental Status') ||
+                      (txt === 'Unconscious' && sc.patientLOC === 'Unconscious');
+        if (match) pill.classList.add('active');
+      });
+    }
+    auditLog.push({ field: 'Level of Consciousness', action: 'populated', value: sc.patientLOC, source: 'scene dictation', reason: '' });
+  } else {
+    auditLog.push({ field: 'Level of Consciousness', action: 'skipped', value: null, source: 'not found', reason: sc.patientLOC ? '"' + sc.patientLOC + '" did not match valid LOC options' : 'Not mentioned' });
+  }
+  appendField('sceneNotes', sc.sceneNotes, 'Scene Notes', 'scene dictation');
+
+  const inc = result.incident || {};
+  setField('chiefComplaint',     inc.chiefComplaint,   'Chief Complaint',   'incident dictation');
+  appendField('hpiNarrative',    inc.hpiNarrative,     'HPI Narrative',     'incident dictation');
+  appendField('sampleNarrative', inc.sampleNarrative,  'SAMPLE Narrative',  'incident dictation');
+  setField('medications',        inc.medications,      'Medications',       'patient/photo info');
+  setField('allergies',          inc.allergies,        'Allergies',         'patient/photo info');
+
+  (result.activityCards || []).forEach(card => {
+    const id = card.cardId;
+    if (!id) return;
+    const label = card.label || 'Card ' + id;
+    [
+      ['time',      'vt-' + id,         'Time'],
+      ['bp',        'vbp-' + id,        'BP'],
+      ['hr',        'vhr-' + id,        'HR'],
+      ['rr',        'vrr-' + id,        'RR'],
+      ['spo2',      'vspo2-' + id,      'SpO2'],
+      ['pain',      'vpain-' + id,      'Pain'],
+      ['skin',      'vskin-' + id,      'Skin'],
+      ['temp',      'vtemp-' + id,      'Temp'],
+      ['glucose',   'vglucose-' + id,   'Glucose'],
+      ['gcsEye',    'vgcs-eye-' + id,   'GCS Eye'],
+      ['gcsVerbal', 'vgcs-verbal-' + id,'GCS Verbal'],
+      ['gcsMotor',  'vgcs-motor-' + id, 'GCS Motor'],
+      ['edRoom',    'ved-room-' + id,   'ED Room'],
+    ].forEach(([key, domId, shortLabel]) => {
+      setField(domId, card[key], label + ' — ' + shortLabel, 'activity notes');
+    });
+    if (card.gcsEye || card.gcsVerbal || card.gcsMotor) {
+      if (typeof updateGCS === 'function') updateGCS(id);
+    }
+    appendField('vactivity-' + id, card.activityNotes, label + ' — Activity Notes', 'activity notes');
+    if (id === 3 && card.hospSelected) {
+      const wrap = document.getElementById('vhosp-pills-' + id);
+      if (wrap) {
+        wrap.querySelectorAll('.transport-hosp-pill').forEach(pill => {
+          pill.classList.toggle('selected', pill.textContent.trim().toLowerCase().includes(card.hospSelected.toLowerCase()));
+        });
+        auditLog.push({ field: 'Transport — Hospital', action: 'populated', value: card.hospSelected, source: 'CAD or dictation', reason: '' });
+      }
+    }
+  });
+
+  if (Array.isArray(result.auditLog)) {
+    result.auditLog.forEach(entry => {
+      if (!auditLog.some(e => e.field === entry.field)) auditLog.push(entry);
+    });
+  }
+
+  return auditLog;
+}
+
+function outputAuditLog(auditLog, callType) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+
+  console.group('%c🚑 AI AUDIT LOG — ' + dateStr + ' ' + timeStr, 'color:#f97316;font-weight:bold;font-size:14px;');
+  console.log('Call Type:', callType || '(not set)');
+  console.table(auditLog.map(e => ({ Field: e.field, Action: e.action, Value: e.value || '—', Source: e.source || '—', Reason: e.reason || '—' })));
+  const p = auditLog.filter(e => e.action === 'populated').length;
+  const u = auditLog.filter(e => e.action === 'updated').length;
+  const s = auditLog.filter(e => e.action === 'skipped').length;
+  console.log('Summary: ' + p + ' populated, ' + u + ' updated, ' + s + ' skipped');
+  console.groupEnd();
+
+  window._lastAuditLog = buildAuditEmailText(auditLog, callType, dateStr, timeStr);
+
+  let ta = document.getElementById('aiAuditTextarea');
+  if (!ta) {
+    ta = document.createElement('textarea');
+    ta.id = 'aiAuditTextarea';
+    ta.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;height:120px;font-family:monospace;font-size:11px;background:#1a1a1a;color:#ccc;border:none;border-top:2px solid #f97316;padding:10px;box-sizing:border-box;z-index:9999;resize:vertical;';
+    ta.placeholder = 'AI audit log — tap to select all and copy';
+    ta.addEventListener('focus', function() { this.select(); });
+    document.body.appendChild(ta);
+  }
+  ta.value = window._lastAuditLog;
+}
+
+function buildAuditEmailText(auditLog, callType, dateStr, timeStr) {
+  const SEP  = '════════════════════════════════════════';
+  const THIN = '────────────────────────────────────────';
+  const L = [];
+  L.push('');
+  L.push(SEP);
+  L.push('AI AUDIT LOG — ' + dateStr + ' at ' + timeStr);
+  L.push('Call Type: ' + (callType || '(not set)'));
+  L.push(SEP);
+  const sections = {
+    'PATIENT':  ['Patient Name','Patient DOB','Patient Age','Patient Sex','Patient Address','Patient City','Patient State','Patient Zip','Patient Phone'],
+    'DISPATCH': ['Call Type','Incident Location','Who Called 911'],
+    'SCENE':    ['Level of Consciousness','Scene Notes'],
+    'INCIDENT': ['Chief Complaint','HPI Narrative','SAMPLE Narrative','Medications','Allergies'],
+  };
+  const sectionFields = Object.values(sections).flat();
+  Object.entries(sections).forEach(([name, fields]) => {
+    const entries = auditLog.filter(e => fields.includes(e.field));
+    if (!entries.length) return;
+    L.push(''); L.push(THIN); L.push(name); L.push(THIN);
+    entries.forEach(e => {
+      const icon = e.action === 'skipped' ? '—' : '✓';
+      L.push(icon + ' ' + e.field.padEnd(24) + '→ ' + (e.action === 'skipped' ? 'SKIPPED' : e.value));
+      if (e.source) L.push('  source: ' + e.source);
+      if (e.reason) L.push('  note:   ' + e.reason);
+    });
+  });
+  const activityEntries = auditLog.filter(e => !sectionFields.includes(e.field) && e.field.includes(' — '));
+  const cards = {};
+  activityEntries.forEach(e => {
+    const idx = e.field.indexOf(' — ');
+    const cardLabel = e.field.slice(0, idx);
+    const fieldLabel = e.field.slice(idx + 3);
+    if (!cards[cardLabel]) cards[cardLabel] = [];
+    cards[cardLabel].push({ ...e, field: fieldLabel });
+  });
+  Object.entries(cards).forEach(([cardLabel, entries]) => {
+    L.push(''); L.push(THIN); L.push('ACTIVITY: ' + cardLabel); L.push(THIN);
+    entries.forEach(e => {
+      const icon = e.action === 'skipped' ? '—' : '✓';
+      L.push(icon + ' ' + e.field.padEnd(24) + '→ ' + (e.action === 'skipped' ? 'SKIPPED' : e.value));
+      if (e.source) L.push('  source: ' + e.source);
+      if (e.reason) L.push('  note:   ' + e.reason);
+    });
+  });
+  const p = auditLog.filter(e => e.action === 'populated').length;
+  const u = auditLog.filter(e => e.action === 'updated').length;
+  const s = auditLog.filter(e => e.action === 'skipped').length;
+  L.push(''); L.push(SEP);
+  L.push('SUMMARY: ' + p + ' populated  |  ' + u + ' updated  |  ' + s + ' skipped');
+  L.push(SEP);
+  L.push('');
+  L.push('REPLY BELOW WITH CORRECTIONS OR FEEDBACK:');
+  L.push('(forward this thread to a Claude session to refine the AI prompt)');
+  L.push('');
+  return L.join('\n');
+}
