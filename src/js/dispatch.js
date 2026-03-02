@@ -953,6 +953,14 @@ window.onload = function() {
   // Ensure spacer is visible on initial Dispatch tab load
   const spacerEl = document.querySelector('.tabs-spacer');
   if (spacerEl) spacerEl.style.display = '';
+
+  // Dynamically size the tabs-spacer to match actual tabs-wrapper height
+  // This ensures content is never hidden under the sticky tabs on any device
+  const tabsWrapper = document.querySelector('.tabs-wrapper');
+  if (tabsWrapper && spacerEl) {
+    const h = tabsWrapper.getBoundingClientRect().height;
+    spacerEl.style.height = h + 'px';
+  }
   
   // Check if user is logged in - if not, show login screen
   checkLogin();
