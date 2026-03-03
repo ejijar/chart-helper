@@ -3708,7 +3708,13 @@ async function processWithAI() {
       document.querySelectorAll('textarea').forEach(ta => {
         if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
       });
-      window.dispatchEvent(new Event('resize'));
+      // Second pass after layout fully settles
+      setTimeout(() => {
+        document.querySelectorAll('textarea').forEach(ta => {
+          if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
+        });
+      }, 600);
+
       // Sync activity pills — highlight any pill whose text appears in the activity notes
       document.querySelectorAll('[id^="vrow-"]').forEach(card => {
         const cardId = card.id.replace("vrow-", "");
