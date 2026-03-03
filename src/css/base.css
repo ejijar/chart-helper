@@ -3793,7 +3793,7 @@
     line-height: 1.5;
     cursor: pointer;
   }
-  .toast.toast-success { border-left: 3px solid var(--success); }
+  .toast.toast-success { border-left: 3px solid var(--success) !important; }
   .toast.toast-error   { border-left: 3px solid var(--danger); }
   .toast.toast-warn    { border-left: 3px solid var(--accent); }
   .toast.toast-info    { border-left: 3px solid #58a6ff; }
@@ -4500,8 +4500,8 @@
 .bucket-empty-text { font-family: var(--mono); font-size: 13px; text-align: center; line-height: 1.6; }
 
 .feed-item-processed {
-  border-left: 3px solid var(--success);
-  opacity: 0.72;
+  border-left: 3px solid var(--success) !important;
+  opacity: 0.45;
 }
 .feed-item-processed .feed-item-type { color: var(--success); }
 

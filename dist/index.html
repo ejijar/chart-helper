@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.92 -->
-<script>const APP_VERSION = 'v10.0.92';</script>
+<!-- Version: v10.0.93 -->
+<script>const APP_VERSION = 'v10.0.93';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -3803,7 +3803,7 @@
     line-height: 1.5;
     cursor: pointer;
   }
-  .toast.toast-success { border-left: 3px solid var(--success); }
+  .toast.toast-success { border-left: 3px solid var(--success) !important; }
   .toast.toast-error   { border-left: 3px solid var(--danger); }
   .toast.toast-warn    { border-left: 3px solid var(--accent); }
   .toast.toast-info    { border-left: 3px solid #58a6ff; }
@@ -4510,8 +4510,8 @@
 .bucket-empty-text { font-family: var(--mono); font-size: 13px; text-align: center; line-height: 1.6; }
 
 .feed-item-processed {
-  border-left: 3px solid var(--success);
-  opacity: 0.72;
+  border-left: 3px solid var(--success) !important;
+  opacity: 0.45;
 }
 .feed-item-processed .feed-item-type { color: var(--success); }
 
@@ -7566,7 +7566,6 @@ function addBucketItem(item) {
   item.stage = inferStage(item.timestamp);
   bucketItems.unshift(item);
   renderBucket();
-  updateAIBtn();
   const bucket = document.getElementById('bucket');
   if (bucket) bucket.scrollTop = 0;
   return item;
@@ -7774,7 +7773,16 @@ function updateAIBtn() {
   const btn = document.getElementById('aiProcessBtn');
   const badge = document.getElementById('aiItemCount');
   if (!btn) return;
-  const unprocessed = bucketItems.filter(i => i.type !== 'ai_result' && !i.processed);
+  const unprocessed = bucketItems.filter(i => {
+    if (i.type === 'ai_result') return false;
+    if (i.processed) return false;
+    // Exclude empty CAD cards (no times filled in)
+    if (i.type === 'cad') {
+      const d = i.data || {};
+      return d.onScene || d.depart || d.hospital || d.rts || d.dest;
+    }
+    return true;
+  });
   const count = unprocessed.length;
   if (badge) {
     badge.textContent = count;
@@ -10199,7 +10207,6 @@ function addAIResultCard(auditLog, callType) {
   };
   bucketItems.unshift(item);
   renderBucket();
-  updateAIBtn();
   const bucket = document.getElementById('bucket');
   if (bucket) bucket.scrollTop = 0;
 }

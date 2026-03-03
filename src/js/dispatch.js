@@ -1494,7 +1494,6 @@ function addBucketItem(item) {
   item.stage = inferStage(item.timestamp);
   bucketItems.unshift(item);
   renderBucket();
-  updateAIBtn();
   const bucket = document.getElementById('bucket');
   if (bucket) bucket.scrollTop = 0;
   return item;
@@ -1702,7 +1701,16 @@ function updateAIBtn() {
   const btn = document.getElementById('aiProcessBtn');
   const badge = document.getElementById('aiItemCount');
   if (!btn) return;
-  const unprocessed = bucketItems.filter(i => i.type !== 'ai_result' && !i.processed);
+  const unprocessed = bucketItems.filter(i => {
+    if (i.type === 'ai_result') return false;
+    if (i.processed) return false;
+    // Exclude empty CAD cards (no times filled in)
+    if (i.type === 'cad') {
+      const d = i.data || {};
+      return d.onScene || d.depart || d.hospital || d.rts || d.dest;
+    }
+    return true;
+  });
   const count = unprocessed.length;
   if (badge) {
     badge.textContent = count;
@@ -4127,7 +4135,6 @@ function addAIResultCard(auditLog, callType) {
   };
   bucketItems.unshift(item);
   renderBucket();
-  updateAIBtn();
   const bucket = document.getElementById('bucket');
   if (bucket) bucket.scrollTop = 0;
 }
