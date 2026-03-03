@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.93 -->
-<script>const APP_VERSION = 'v10.0.93';</script>
+<!-- Version: v10.0.94 -->
+<script>const APP_VERSION = 'v10.0.94';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -4511,9 +4511,11 @@
 
 .feed-item-processed {
   border-left: 3px solid var(--success) !important;
-  opacity: 0.45;
+  background: var(--surface-alt, rgba(128,128,128,0.08)) !important;
 }
-.feed-item-processed .feed-item-type { color: var(--success); }
+.feed-item-processed .feed-item-header { opacity: 0.55; }
+.feed-item-processed .feed-item-body { opacity: 0.55; }
+.feed-item-processed .feed-item-type { color: var(--success); opacity: 1; }
 
 .feed-item {
   background: var(--surface);
@@ -7566,6 +7568,7 @@ function addBucketItem(item) {
   item.stage = inferStage(item.timestamp);
   bucketItems.unshift(item);
   renderBucket();
+  updateAIBtn();
   const bucket = document.getElementById('bucket');
   if (bucket) bucket.scrollTop = 0;
   return item;
@@ -7611,7 +7614,8 @@ function renderBucket() {
   bucket.querySelectorAll('.feed-item').forEach(el => el.remove());
   bucketItems.forEach(item => {
     const el = document.createElement('div');
-    el.className = 'feed-item' + (item.processed ? ' feed-item-processed' : '');
+    const isEmptyCAD = item.type === 'cad' && !(item.data && (item.data.onScene || item.data.depart || item.data.hospital || item.data.rts || item.data.dest));
+    el.className = 'feed-item' + (item.processed && !isEmptyCAD ? ' feed-item-processed' : '');
     if (item.type === 'cad') {
       el.onclick = toggleDrawer;
       el.style.cursor = 'pointer';
@@ -7789,6 +7793,9 @@ function updateAIBtn() {
     badge.style.display = count > 0 ? 'inline-block' : 'none';
   }
   btn.classList.toggle('ready', count > 0);
+  btn.disabled = count === 0;
+  btn.style.opacity = count === 0 ? '0.45' : '';
+  btn.style.cursor = count === 0 ? 'default' : '';
 }
 
 function processWithAI_REPLACED() {

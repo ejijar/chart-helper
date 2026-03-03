@@ -4501,9 +4501,11 @@
 
 .feed-item-processed {
   border-left: 3px solid var(--success) !important;
-  opacity: 0.45;
+  background: var(--surface-alt, rgba(128,128,128,0.08)) !important;
 }
-.feed-item-processed .feed-item-type { color: var(--success); }
+.feed-item-processed .feed-item-header { opacity: 0.55; }
+.feed-item-processed .feed-item-body { opacity: 0.55; }
+.feed-item-processed .feed-item-type { color: var(--success); opacity: 1; }
 
 .feed-item {
   background: var(--surface);

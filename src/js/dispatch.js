@@ -1494,6 +1494,7 @@ function addBucketItem(item) {
   item.stage = inferStage(item.timestamp);
   bucketItems.unshift(item);
   renderBucket();
+  updateAIBtn();
   const bucket = document.getElementById('bucket');
   if (bucket) bucket.scrollTop = 0;
   return item;
@@ -1539,7 +1540,8 @@ function renderBucket() {
   bucket.querySelectorAll('.feed-item').forEach(el => el.remove());
   bucketItems.forEach(item => {
     const el = document.createElement('div');
-    el.className = 'feed-item' + (item.processed ? ' feed-item-processed' : '');
+    const isEmptyCAD = item.type === 'cad' && !(item.data && (item.data.onScene || item.data.depart || item.data.hospital || item.data.rts || item.data.dest));
+    el.className = 'feed-item' + (item.processed && !isEmptyCAD ? ' feed-item-processed' : '');
     if (item.type === 'cad') {
       el.onclick = toggleDrawer;
       el.style.cursor = 'pointer';
@@ -1717,6 +1719,9 @@ function updateAIBtn() {
     badge.style.display = count > 0 ? 'inline-block' : 'none';
   }
   btn.classList.toggle('ready', count > 0);
+  btn.disabled = count === 0;
+  btn.style.opacity = count === 0 ? '0.45' : '';
+  btn.style.cursor = count === 0 ? 'default' : '';
 }
 
 function processWithAI_REPLACED() {
