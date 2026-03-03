@@ -3983,7 +3983,7 @@ function outputAuditLog(auditLog, callType) {
   if (!ta) {
     ta = document.createElement('textarea');
     ta.id = 'aiAuditTextarea';
-    ta.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;height:120px;font-family:monospace;font-size:11px;background:#1a1a1a;color:#ccc;border:none;border-top:2px solid #f97316;padding:10px;box-sizing:border-box;z-index:9999;resize:vertical;max-height:300px;';
+    ta.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;height:120px;font-family:monospace;font-size:11px;background:#1a1a1a;color:#ccc;border:none;border-top:2px solid #f97316;padding:10px;box-sizing:border-box;z-index:9999;resize:vertical;max-height:300px;max-height:300px;';
     ta.placeholder = 'AI audit log — tap to select all and copy';
     ta.addEventListener('focus', function() { this.select(); });
     document.body.appendChild(ta);
