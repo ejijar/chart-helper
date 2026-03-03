@@ -3702,6 +3702,11 @@ async function processWithAI() {
 
     outputAuditLog(auditLog, chartState.callType);
     addAIResultCard(auditLog, chartState.callType);
+    // After AI populates cards: resize textareas and recheck transport/refusal exclusivity
+    document.querySelectorAll('textarea[id^="vactivity-"]').forEach(ta => {
+      if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
+    });
+    if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
 
   } catch(err) {
     progressBar.hide();
