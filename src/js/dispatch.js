@@ -3724,14 +3724,23 @@ async function processWithAI() {
           // Check if the pill's expected output text appears in the notes
           const pillOutputMap = {
             'Primary Assessment': 'Primary assessment.',
-            'Rapid Trauma Assessment': 'Rapid trauma assessment',
-            'Vital Signs Taken': 'Vital signs taken.',
-            'Vitals Re-assessed': 'Vitals re-assessed.',
+            'Rapid Trauma Assessment/No Findings': 'Rapid Trauma Assessment with no additional pertinent findings',
+            'Rapid Trauma Assessment/Findings': 'Rapid Trauma Assessment conducted',
+            'Vitals taken': 'Vital signs taken.',
+            'Vitals Re-Assessed': 'Vitals re-assessed',
+            'Alert/Oriented': 'Patient was',
+            'Collar': 'cervical collar',
+            'EMS Assisted Medic 350': 'EMS assisted Paramedic 350',
+            'Medic 350 Triage BLS': 'Paramedic 350 triaged to BLS',
+            'Medic 350 Care': 'Paramedic 350 assumed care',
+            'See Medic 350 Chart': 'See Paramedic 350 chart',
             'Transport Commenced': 'Transport to',
             'Patient Comforted': 'Patient kept comfortable en route',
             'Transport Uneventful': 'without incident',
             'Arrived at Hospital': 'Arrived at',
-            'Report to RN': 'Report provided to ED Nurse',
+            'Transfer to Bed': 'EMS assisted patient from stretcher',
+            'Care Transfer to RN': 'Report provided to ED Nurse',
+            'Patient Secured/Loaded': 'secured to stretcher',
           };
           const expectedText = pillOutputMap[pillText];
           if (expectedText && notes.includes(expectedText)) {
