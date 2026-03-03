@@ -1385,7 +1385,7 @@ function openNote() {
   }
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', repositionNoteSheet);
-    window.visualViewport.addEventListener('resize', () => { document.querySelectorAll('textarea').forEach(ta => { if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta); }); });
+    window.visualViewport.addEventListener('resize', () => { document.querySelectorAll('textarea:not(#aiAuditTextarea)').forEach(ta => { if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta); }); });
     window.visualViewport.addEventListener('scroll', repositionNoteSheet);
     overlay._vpCleanup = () => {
       window.visualViewport.removeEventListener('resize', repositionNoteSheet);
@@ -3705,12 +3705,12 @@ async function processWithAI() {
     addAIResultCard(auditLog, chartState.callType);
     // After AI populates cards: resize textareas, sync pills, recheck exclusivity
     setTimeout(() => {
-      document.querySelectorAll('textarea').forEach(ta => {
+      document.querySelectorAll('textarea:not(#aiAuditTextarea)').forEach(ta => {
         if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
       });
       // Second pass after layout fully settles
       setTimeout(() => {
-        document.querySelectorAll('textarea').forEach(ta => {
+        document.querySelectorAll('textarea:not(#aiAuditTextarea)').forEach(ta => {
           if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
         });
       }, 600);
