@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.76 -->
-<script>const APP_VERSION = 'v10.0.76';</script>
+<!-- Version: v10.0.77 -->
+<script>const APP_VERSION = 'v10.0.77';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -9814,7 +9814,7 @@ async function processWithAI() {
         });
       });
       if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
-    }, 200);
+    }, 500);
 
   } catch(err) {
     progressBar.hide();
@@ -9959,7 +9959,7 @@ function applyAIResults(result, existingChart) {
     if (!el) return;
     const existing = el.value && el.value.trim();
     el.value = existing ? existing + '\n' + value.toString().trim() : value.toString().trim();
-    if (typeof autoResizeTextarea === 'function') autoResizeTextarea(el);
+    if (typeof autoResizeTextarea === 'function') requestAnimationFrame(() => autoResizeTextarea(el));
     auditLog.push({ field: fieldLabel, action: existing ? 'updated' : 'populated', value: value.toString().trim(), source: source || 'AI extraction', reason: existing ? 'Appended to existing' : 'Field was empty' });
   };
 

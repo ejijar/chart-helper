@@ -3749,7 +3749,7 @@ async function processWithAI() {
         });
       });
       if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
-    }, 200);
+    }, 500);
 
   } catch(err) {
     progressBar.hide();
@@ -3894,7 +3894,7 @@ function applyAIResults(result, existingChart) {
     if (!el) return;
     const existing = el.value && el.value.trim();
     el.value = existing ? existing + '\n' + value.toString().trim() : value.toString().trim();
-    if (typeof autoResizeTextarea === 'function') autoResizeTextarea(el);
+    if (typeof autoResizeTextarea === 'function') requestAnimationFrame(() => autoResizeTextarea(el));
     auditLog.push({ field: fieldLabel, action: existing ? 'updated' : 'populated', value: value.toString().trim(), source: source || 'AI extraction', reason: existing ? 'Appended to existing' : 'Field was empty' });
   };
 
