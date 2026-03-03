@@ -1792,7 +1792,7 @@ function selectLocAlert(btn, value) {
   btn.classList.add('selected');
   locAlertValue = value;
   const orientedGroup = document.getElementById('locOrientedGroup');
-  if (value === 'Alert' || value === 'Altered') {
+  if (value === 'Alert' || value === 'Altered Mental Status') {
     orientedGroup.style.display = 'block';
   } else {
     orientedGroup.style.display = 'none';
