@@ -228,6 +228,13 @@ function logoutUser() {
 
     sessionStorage.removeItem('currentUser');
     sessionStorage.removeItem('emsEncryptionKey');
+    // Clear audit log overlay on sign-out
+    const auditTa = document.getElementById('aiAuditTextarea');
+    const auditBtn = document.getElementById('aiAuditCloseBtn');
+    if (auditTa) auditTa.remove();
+    if (auditBtn) auditBtn.remove();
+    window._lastAuditLog = '';
+    document.body.style.paddingBottom = '';
     showLoginScreen();
   });
 }
