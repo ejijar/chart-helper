@@ -6,7 +6,7 @@
 # ============================================================
 SRC="src"
 DIST="dist"
-OUTPUT="$DIST/ems-chart.html"
+OUTPUT="$DIST/index.html"
 echo "Building EMS Chart Helper..."
 while IFS= read -r line; do
   if echo "$line" | grep -q 'href="css/base.css"'; then
