@@ -1385,6 +1385,7 @@ function openNote() {
   }
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', repositionNoteSheet);
+    window.visualViewport.addEventListener('resize', () => { document.querySelectorAll('textarea').forEach(ta => { if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta); }); });
     window.visualViewport.addEventListener('scroll', repositionNoteSheet);
     overlay._vpCleanup = () => {
       window.visualViewport.removeEventListener('resize', repositionNoteSheet);
@@ -1791,7 +1792,7 @@ function selectLocAlert(btn, value) {
   btn.classList.add('selected');
   locAlertValue = value;
   const orientedGroup = document.getElementById('locOrientedGroup');
-  if (value === 'Alert') {
+  if (value === 'Alert' || value === 'Altered') {
     orientedGroup.style.display = 'block';
   } else {
     orientedGroup.style.display = 'none';
@@ -3702,10 +3703,41 @@ async function processWithAI() {
 
     outputAuditLog(auditLog, chartState.callType);
     addAIResultCard(auditLog, chartState.callType);
-    // After AI populates cards: resize textareas and recheck transport/refusal exclusivity
+    // After AI populates cards: resize textareas, sync pills, recheck exclusivity
     setTimeout(() => {
       document.querySelectorAll('textarea').forEach(ta => {
         if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
+      });
+      // Sync activity pills — highlight any pill whose text appears in the activity notes
+      document.querySelectorAll('.vitals-card').forEach(card => {
+        const cardId = card.id.replace('vrow-', '');
+        const notesEl = document.getElementById('vactivity-' + cardId);
+        if (!notesEl || !notesEl.value) return;
+        const notes = notesEl.value;
+        card.querySelectorAll('.activity-pill').forEach(pill => {
+          const pillText = pill.textContent.trim();
+          // Only sync non-hospital, non-denial pills that insert specific text
+          const skipPills = ['Norwalk Hospital', 'Stamford Hospital', 'Denied Pain',
+            'Denied LOC', 'Denied Shortness of Breath', 'Denied Chest Pain',
+            'Denied Dizziness', 'Denied Nausea', 'Alert/Oriented'];
+          if (skipPills.includes(pillText)) return;
+          // Check if the pill's expected output text appears in the notes
+          const pillOutputMap = {
+            'Primary Assessment': 'Primary assessment.',
+            'Rapid Trauma Assessment': 'Rapid trauma assessment',
+            'Vital Signs Taken': 'Vital signs taken.',
+            'Vitals Re-assessed': 'Vitals re-assessed.',
+            'Transport Commenced': 'Transport to',
+            'Patient Comforted': 'Patient kept comfortable en route',
+            'Transport Uneventful': 'without incident',
+            'Arrived at Hospital': 'Arrived at',
+            'Report to RN': 'Report provided to ED Nurse',
+          };
+          const expectedText = pillOutputMap[pillText];
+          if (expectedText && notes.includes(expectedText)) {
+            pill.classList.add('selected');
+          }
+        });
       });
       if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
     }, 50);
