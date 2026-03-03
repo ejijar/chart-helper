@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.65 -->
-<script>const APP_VERSION = 'v10.0.65';</script>
+<!-- Version: v10.0.66 -->
+<script>const APP_VERSION = 'v10.0.66';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -5934,6 +5934,80 @@ INCIDENT:
 CALL TYPE — match to one of: "lift_assist", "chest_pain", "respiratory", "trauma", "diabetic", "mva"
 
 ACTIVITY CARDS — for each card populate only vitals with explicit values, plus activityNotes narrative.
+
+ACTIVITY NOTES STYLE RULES:
+- Past tense throughout. Concise. No flowery language.
+- Do not repeat information already captured in other fields (chief complaint, HPI, vitals).
+- Each card's notes are independent — do not copy content from one card to another.
+- Standard closing phrases (see below) must appear verbatim when applicable.
+- If Paramedic 350 is involved, follow Paramedic Rules below.
+
+---
+
+FIRST CONTACT (cardId: 1)
+Write a concise primary assessment note. Include:
+- How patient was found / patient presentation on arrival
+- Primary assessment: airway, breathing, circulation status
+- Chief complaint details and relevant history surfaced at first contact
+- Patient's level of distress (or lack thereof)
+- Initial interventions if any
+- If Paramedic assumed care: end with — "Paramedic 350 assumed care. See Paramedic 350 chart of same date for further information."
+- If Paramedic triaged to BLS: end with — "Paramedic 350 triaged to BLS. See Paramedic 350 chart of same date for further information."
+- If Paramedic cancelled on scene: note — "Paramedic 350 cancelled on scene."
+
+ON-SCENE ACTIVITY #1 and additional on-scene cards (cardId: 2, and any added cards)
+Write a secondary assessment and intervention note. Include:
+- Secondary assessment findings and interventions
+- Patient history obtained if not already captured
+- Move-to-ambulance description: ALWAYS include on the LAST on-scene card before Transport.
+  Use whichever phrase matches the actual situation:
+  * "Patient walked to ambulance and secured to stretcher."
+  * "EMS assisted patient to ambulance and secured to stretcher."
+  * "Patient transported via StairChair to ambulance and secured to stretcher."
+  * "Patient carried on Reeves to stretcher and secured."
+  * "Stretcher brought to patient, patient lifted onto stretcher and secured, then loaded into ambulance."
+  * "Patient placed on scoop stretcher, transferred to stretcher and secured."
+  * "Patient placed in car seat, secured and carried to ambulance. Car seat strapped to stretcher." (pediatric)
+  * "Patient transported via wheelchair to ambulance, transferred to stretcher and secured."
+  Use the most accurate description based on available information. If move method is unclear, use: "Patient moved to ambulance and secured to stretcher."
+- If Paramedic involved: end with — "See Paramedic 350 chart for further information."
+
+TRANSPORT (cardId: 3)
+Always begin with: "Transport initiated to [Hospital Name]."
+Then include:
+- En route care, monitoring, interventions
+- At minimum one vitals reassessment noted (even if just "Vitals reassessed.")
+- Patient comfort/status en route
+- Default hospitals: Norwalk Hospital, Stamford Hospital. Use whichever is in the call data.
+- If Paramedic involved: end with — "See Paramedic 350 chart for further details."
+
+HOSPITAL TRANSFER (cardId: 4)
+Always begin with: "Arrived at [Hospital Name] without incident." (or "Arrival [Hospital Name] without incident.")
+Then include:
+- Where patient was taken: "Patient brought to ED Room [X]." or "Patient brought to [location]."
+- If patient self-ambulated from stretcher to bed, note it.
+- Always end with one of these (use whichever fits):
+  * "Report provided to ED Nurse and care transferred."
+  * "Transfer of care and report given to staff RN."
+- If Paramedic involved: add — "See Paramedic 350 chart for further information."
+- edRoom field: populate with room number if mentioned (number only, e.g. "7")
+
+REFUSAL CALLS
+- Transport and Hospital Transfer cards are DISABLED for refusal calls.
+- Refusal note goes in the last active on-scene card.
+- Always end refusal notes with: "RMA prepared and explained to patient. Patient indicated understanding and signed RMA."
+  Variations: family member signed → "...and [mother/father/daughter/etc] signed RMA."
+  Witnessed by police → add "NCPD witnessed."
+
+---
+
+PARAMEDIC RULES:
+- Unit is always Paramedic 350 for NCEMS calls.
+- Takeover: end First Contact with — "Paramedic 350 assumed care. See Paramedic 350 chart of same date for further information."
+- Triage to BLS: note in First Contact — "Paramedic 350 triaged to BLS. See Paramedic 350 chart of same date for further information."
+- All subsequent cards after a takeover: end with — "See Paramedic 350 chart for further information."
+  (Transport card variant: "See Paramedic 350 chart for further details.")
+- When Paramedic provides report at hospital: note — "Paramedic 350 provided report and care transferred." instead of the standard RN transfer line.
 
 CALL-TYPE SPECIFIC GUIDANCE:
 - diabetic: prompt for glucose reading; note oral glucose or D50 if mentioned
