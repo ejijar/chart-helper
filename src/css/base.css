@@ -4498,6 +4498,13 @@
 }
 .bucket-cad-btn:hover { border-color: var(--accent); color: var(--accent); }
 .bucket-empty-text { font-family: var(--mono); font-size: 13px; text-align: center; line-height: 1.6; }
+
+.feed-item-processed {
+  border-left: 3px solid var(--success);
+  opacity: 0.72;
+}
+.feed-item-processed .feed-item-type { color: var(--success); }
+
 .feed-item {
   background: var(--surface);
   border: 1px solid var(--border);
