@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.80 -->
-<script>const APP_VERSION = 'v10.0.80';</script>
+<!-- Version: v10.0.81 -->
+<script>const APP_VERSION = 'v10.0.81';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -9794,7 +9794,7 @@ async function processWithAI() {
             'Vitals taken': 'Vital signs taken.',
             'Vitals Re-Assessed': 'Vitals re-assessed',
             'Alert/Oriented': 'Patient was',
-            'Collar': 'cervical collar',
+            'Collar': 'EMS applied a cervical collar',
             'EMS Assisted Medic 350': 'EMS assisted Paramedic 350',
             'Medic 350 Triage BLS': 'Paramedic 350 triaged to BLS',
             'Medic 350 Care': 'Paramedic 350 assumed care',
@@ -11277,7 +11277,7 @@ function generateCardHTML(id, label = '', isOpen = true, pills = []) {
       <div class="vitals-line-4">
         <div class="vitals-field-full">
           <label>Activity Notes</label>
-          <textarea id="vactivity-${id}" placeholder="What was done at this time…" rows="1" style="min-height: 38px; overflow-y: hidden;" oninput="autoResizeTextarea(this);${isExclusiveCard ? 'checkTransportRefusalExclusivity();' : ''}" autocomplete="off"></textarea>
+          <textarea id="vactivity-${id}" placeholder="What was done at this time…" rows="1" style="min-height: 38px;" oninput="autoResizeTextarea(this);${isExclusiveCard ? 'checkTransportRefusalExclusivity();' : ''}" autocomplete="off"></textarea>
         </div>
       </div>
       </div>

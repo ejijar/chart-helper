@@ -1098,7 +1098,7 @@ function generateCardHTML(id, label = '', isOpen = true, pills = []) {
       <div class="vitals-line-4">
         <div class="vitals-field-full">
           <label>Activity Notes</label>
-          <textarea id="vactivity-${id}" placeholder="What was done at this time…" rows="1" style="min-height: 38px; overflow-y: hidden;" oninput="autoResizeTextarea(this);${isExclusiveCard ? 'checkTransportRefusalExclusivity();' : ''}" autocomplete="off"></textarea>
+          <textarea id="vactivity-${id}" placeholder="What was done at this time…" rows="1" style="min-height: 38px;" oninput="autoResizeTextarea(this);${isExclusiveCard ? 'checkTransportRefusalExclusivity();' : ''}" autocomplete="off"></textarea>
         </div>
       </div>
       </div>

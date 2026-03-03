@@ -3729,7 +3729,7 @@ async function processWithAI() {
             'Vitals taken': 'Vital signs taken.',
             'Vitals Re-Assessed': 'Vitals re-assessed',
             'Alert/Oriented': 'Patient was',
-            'Collar': 'cervical collar',
+            'Collar': 'EMS applied a cervical collar',
             'EMS Assisted Medic 350': 'EMS assisted Paramedic 350',
             'Medic 350 Triage BLS': 'Paramedic 350 triaged to BLS',
             'Medic 350 Care': 'Paramedic 350 assumed care',
