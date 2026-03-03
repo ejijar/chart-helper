@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.90 -->
-<script>const APP_VERSION = 'v10.0.90';</script>
+<!-- Version: v10.0.91 -->
+<script>const APP_VERSION = 'v10.0.91';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -7664,7 +7664,7 @@ function getBucketBody(item) {
     return '<div class="feed-note-text" style="font-family:var(--mono);font-size:12px;line-height:1.8">' +
       '<strong style="color:var(--success)">&#x2713; AI chart complete</strong><br>' +
       total + ' field' + (total !== 1 ? 's' : '') + ' filled in &nbsp;&middot;&nbsp; ' + item.skipped + ' left blank<br>' +
-      '<span style="color:var(--text-dim);font-size:11px">Audit log will appear in your next chart email</span>' +
+      '<button onclick="copyAuditLog()" style="margin-top:6px;background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:11px;font-weight:bold;cursor:pointer;">&#x2398; Copy Audit Log</button>' +
       '</div>';
   }
   if (item.type === 'note') {
@@ -9902,7 +9902,7 @@ function buildBucketSummary() {
     return '<div class="feed-note-text" style="font-family:var(--mono);font-size:12px;line-height:1.8">' +
       '<strong style="color:var(--success)">&#x2713; AI chart complete</strong><br>' +
       total + ' field' + (total !== 1 ? 's' : '') + ' filled in &nbsp;&middot;&nbsp; ' + item.skipped + ' left blank<br>' +
-      '<span style="color:var(--text-dim);font-size:11px">Audit log will appear in your next chart email</span>' +
+      '<button onclick="copyAuditLog()" style="margin-top:6px;background:var(--accent);color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:11px;font-weight:bold;cursor:pointer;">&#x2398; Copy Audit Log</button>' +
       '</div>';
   }
   if (item.type === 'note') {
@@ -10097,32 +10097,28 @@ function outputAuditLog(auditLog, callType) {
 
   window._lastAuditLog = buildAuditEmailText(auditLog, callType, dateStr, timeStr);
 
-  let ta = document.getElementById('aiAuditTextarea');
-  if (!ta) {
-    ta = document.createElement('textarea');
-    ta.id = 'aiAuditTextarea';
-    ta.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;height:72px;font-family:monospace;font-size:11px;background:#1a1a1a;color:#ccc;border:none;border-top:2px solid #f97316;padding:8px 10px;box-sizing:border-box;z-index:9999;resize:none;';
-    ta.placeholder = 'AI audit log — tap to select all and copy';
-    ta.addEventListener('focus', function() { this.select(); });
-    // Close button
-    const closeBtn = document.createElement('button');
-    closeBtn.id = 'aiAuditCloseBtn';
-    closeBtn.textContent = '✕ Close Log';
-    closeBtn.style.cssText = 'position:fixed;bottom:74px;right:12px;z-index:10000;background:#f97316;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:12px;font-weight:bold;cursor:pointer;';
-    closeBtn.addEventListener('click', function() {
-      const t = document.getElementById('aiAuditTextarea');
-      const b = document.getElementById('aiAuditCloseBtn');
-      if (t) t.remove();
-      if (b) b.remove();
-      document.body.style.paddingBottom = '';
-    });
-    document.body.appendChild(closeBtn);
-    document.body.appendChild(ta);
-    document.body.style.paddingBottom = '80px';
-  }
-  ta.value = window._lastAuditLog;
 }
 
+
+// Copy audit log to clipboard
+function copyAuditLog() {
+  if (!window._lastAuditLog) {
+    alert('No audit log available.');
+    return;
+  }
+  navigator.clipboard.writeText(window._lastAuditLog).then(() => {
+    const btns = document.querySelectorAll('button');
+    btns.forEach(b => { if (b.textContent.includes('Copy Audit Log')) { b.textContent = '✓ Copied!'; setTimeout(() => { b.innerHTML = '&#x2398; Copy Audit Log'; }, 2000); } });
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = window._lastAuditLog;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    ta.remove();
+  });
+}
 function buildAuditEmailText(auditLog, callType, dateStr, timeStr) {
   const SEP  = '════════════════════════════════════════';
   const THIN = '────────────────────────────────────────';
