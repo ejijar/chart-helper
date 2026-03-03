@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.69 -->
-<script>const APP_VERSION = 'v10.0.69';</script>
+<!-- Version: v10.0.70 -->
+<script>const APP_VERSION = 'v10.0.70';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -5911,8 +5911,11 @@ CARDINAL RULES - NEVER VIOLATE THESE:
 4. DO NOT overwrite a field that already has a value unless the new value is clearly more accurate. Flag overwrites in audit log.
 5. Patient sex: only populate if explicitly stated (e.g. 'male patient', '56 year old female'). Do NOT infer from pronouns or relationship words.
 6. NEVER infer vitals are stable or unchanged. Only document what is explicitly stated.
-7. NEVER assign vitals to a card based on guesswork. If no timestamp or context confirms which card vitals belong to, note ambiguity in auditLog.
-8. Chief complaint is the patient's primary SYMPTOM - not the mechanism of injury. 'Right hip pain' is a CC. 'Fell in bathroom' is mechanism. When only a mechanism is stated with no symptom, use: [What is the patient's chief complaint?]
+7. NEVER assign vitals to a card based on guesswork. If vitals are given together in one note with no timestamps, place ALL of them on On-Scene Activity #1 (cardId 2). Never split a bundled set of vitals across multiple cards.
+8. Chief complaint is the patient's primary SYMPTOM - not the mechanism of injury.
+   - If source states a symptom explicitly (e.g. 'c/o right hip pain', 'complaining of chest pain'), use THAT as the CC.
+   - If source states ONLY a mechanism with no symptom (e.g. 'fell in bathroom'), use: [What is the patient's chief complaint?]
+   - NEVER use the mechanism of injury as the CC when a symptom is also present.
 9. NEVER include pertinent negatives unless the patient explicitly stated them. If not documented, use a placeholder.
 
 FIELD POPULATION RULES:
@@ -5921,37 +5924,34 @@ PATIENT: name, DOB (YYYY-MM-DD), age (number only if explicitly stated), sex (ma
 
 SCENE:
 - patientLOC: MUST be exactly one of: 'Alert and Oriented x4', 'Alert and Oriented x3', 'Alert and Oriented x2', 'Alert and Oriented x1', 'Altered Mental Status', 'Unconscious' - or '' if not mentioned
-- sceneNotes: Always begin with 'Upon arrival, patient was [location/position].' Then note who was present. End with who called 911. Use bracketed placeholders for unknown elements. Example: 'Upon arrival, patient was found on the bathroom floor. Husband was present. [Who called 911?]'
+- sceneNotes: Always begin with 'Upon arrival, patient was [location/position].' Then note who was present. End with who called 911. Use bracketed placeholders for unknown elements.
 
 INCIDENT:
 - chiefComplaint: the patient's primary SYMPTOM as a complete sentence in quotes with attribution. Rules:
-  * CC is the SYMPTOM, not the mechanism. 'I have right hip pain' is correct. 'I fell in the bathroom' is mechanism, not CC.
-  * If source gives only a mechanism with no symptom stated, use: [What is the patient's chief complaint?]
-  * If source gives both mechanism and symptom, always use the symptom as the CC.
-  * Use the patient's actual words when available. If only a brief symptom description is given, infer a natural first-person quote.
-  * Always a complete sentence in quotes. Never a noun phrase.
-  * Always include quote marks and '- per [source]' attribution.
-- hpiNarrative: Always use this format: '[Age] year-old [sex] patient was [doing X] when [event occurred]. Patient [any actions taken before EMS]. [Who] called 911.' Use bracketed placeholders for unknown elements. Always end with who called 911.
-- sampleNarrative: SAMPLE details including PMH, medications, allergies, last intake, events. Use placeholders for missing elements: [Other PMH?], [Allergies?], [Last oral intake?]
+  * CC is the SYMPTOM, not the mechanism.
+  * If source explicitly states a symptom ('c/o X', 'complaining of X', 'reports X'), that IS the CC - use it.
+  * Express it in the patient's voice: 'My right hip hurts' - per patient
+  * If ONLY a mechanism is given with no symptom mentioned at all, use: [What is the patient's chief complaint?]
+  * Always a complete sentence in quotes with '- per [source]' attribution.
+- hpiNarrative: Format: '[Age] year-old [sex] patient was [doing X] when [event occurred]. Patient [actions taken before EMS]. [Who] called 911.' Use bracketed placeholders for unknowns. Always end with who called 911.
+- sampleNarrative: SAMPLE details. Write as plain prose sentences - the app will format as bullets automatically. Include PMH, medications, allergies, last intake, events. Use placeholders for missing elements: [Other PMH?] [Allergies?] [Last oral intake?]
 - medications: only if explicitly stated or visible in photo
 - allergies: only if explicitly stated
 
 CALL TYPE - match to one of: 'lift_assist', 'chest_pain', 'respiratory', 'trauma', 'diabetic', 'mva'
 
 ACTIVITY CARDS - VITALS ASSIGNMENT BY CARD:
-- First Contact (cardId 1): HR and RR only. Do NOT put BP, SpO2, glucose, temp, skin, or pain here.
-- On-Scene Activity #1 (cardId 2): full vitals - BP, HR, RR, SpO2, pain, skin, temp, glucose if taken.
+- First Contact (cardId 1): HR and RR only — BUT only if those vitals were explicitly taken during the primary assessment. If all vitals were taken together in one note, put ALL of them on cardId 2.
+- On-Scene Activity #1 (cardId 2): full vitals - BP, HR, RR, SpO2, pain, skin, temp, glucose. This is the default card for any bundled vitals set.
 - Transport (cardId 3): vitals only if explicitly re-assessed en route.
 - Hospital Transfer (cardId 4): vitals only if explicitly re-assessed on arrival.
-- VITALS CARD ASSIGNMENT: If vitals have no context to confirm which card they belong to, do NOT guess. Note ambiguity in auditLog.
-- SpO2 AND HR PAIRING: SpO2 and HR are always measured together by pulse oximeter. If SpO2 is documented, place HR on the same card. Never split SpO2 and HR across different cards.
-- RESPIRATORY RATE CARRY-FORWARD: RR may be carried forward to subsequent cards unchanged UNLESS source data indicates a change in patient status. Never guess a new RR - use placeholder [RR changed?] if status changed.
+- BUNDLED VITALS RULE: If a single note contains multiple vitals together (e.g. 'HR 88, BP 142/86, RR 16, SpO2 97%') with no indication they were taken at different times, place ALL of them on cardId 2. Never split bundled vitals.
+- SpO2 AND HR PAIRING: SpO2 and HR are always measured together by pulse oximeter. Never put them on different cards.
+- RESPIRATORY RATE CARRY-FORWARD: RR may be carried to subsequent cards unchanged UNLESS source indicates a status change. Never guess a new RR.
 
 ACTIVITY NOTES - VITALS DOCUMENTATION RULE:
-- First Contact: if HR or RR are populated, include 'Vital signs taken.' in activityNotes.
-- On-Scene Activity #1: if BP, SpO2, glucose, pain, skin, or temp are populated, include 'Vital signs taken.' in activityNotes.
-- Transport: if any vitals are populated, include 'Vitals re-assessed.' in activityNotes.
-- Hospital Transfer: if any vitals are populated, include 'Vitals re-assessed.' in activityNotes.
+- Any card where vitals are populated: include 'Vital signs taken.' in activityNotes.
+- Transport and Hospital Transfer cards: use 'Vitals re-assessed.' instead.
 
 ACTIVITY NOTES STYLE RULES:
 - Past tense throughout. Concise. No flowery language.
@@ -5967,12 +5967,11 @@ ACTIVITY NOTES STYLE RULES:
 FIRST CONTACT (cardId: 1)
 Always use this structure:
 1. 'Primary assessment.' - always the first line.
-2. Trauma/fall calls only: 'Rapid trauma assessment with no additional pertinent findings.' OR 'Rapid trauma assessment conducted. [describe unexpected findings only - not the known CC].'
+2. Trauma/fall calls only: 'Rapid trauma assessment with no additional pertinent findings.' OR 'Rapid trauma assessment conducted. [unexpected findings only - not the known CC].'
    - NEVER append the chief complaint to this line. Only note findings BEYOND the CC.
-   - If no unexpected findings: 'Rapid trauma assessment with no additional pertinent findings.'
-3. 'Vital signs taken.' - if HR or RR are populated.
+3. 'Vital signs taken.' - only if vitals are populated on this card.
 4. Alert/oriented status if documented: 'Patient alert and oriented x4.' (or x3, x2, x1)
-5. Pertinent negatives ONLY if explicitly stated in source data. If not stated: [Pertinent negatives: LOC? Chest pain? SOB? Dizziness? Nausea?]
+5. Pertinent negatives ONLY if explicitly stated. If not: [Pertinent negatives: LOC? Chest pain? SOB? Dizziness? Nausea?]
 6. C-collar placeholder for patients 65 or older with fall or trauma: '[Cervical collar applied?]'
 7. Any other immediate interventions noted in source data.
 8. Paramedic line if applicable (see Paramedic Rules).
@@ -5980,7 +5979,7 @@ Always use this structure:
 ON-SCENE ACTIVITY #1 and additional on-scene cards (cardId: 2+)
 Do NOT begin with 'Secondary assessment completed.'
 Include in this order:
-1. 'Vital signs taken.' if full vitals are populated on this card.
+1. 'Vital signs taken.' if vitals are populated on this card.
 2. Relevant history, PMH, medications if not already in HPI.
 3. Interventions performed.
 4. Additional assessment findings.
@@ -9769,10 +9768,12 @@ async function processWithAI() {
     outputAuditLog(auditLog, chartState.callType);
     addAIResultCard(auditLog, chartState.callType);
     // After AI populates cards: resize textareas and recheck transport/refusal exclusivity
-    document.querySelectorAll('textarea[id^="vactivity-"]').forEach(ta => {
-      if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
-    });
-    if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
+    setTimeout(() => {
+      document.querySelectorAll('textarea').forEach(ta => {
+        if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
+      });
+      if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
+    }, 50);
 
   } catch(err) {
     progressBar.hide();
@@ -9978,7 +9979,7 @@ function applyAIResults(result, existingChart) {
   const inc = result.incident || {};
   setField('chiefComplaint',     inc.chiefComplaint,   'Chief Complaint',   'incident dictation');
   appendField('hpiNarrative',    inc.hpiNarrative,     'HPI Narrative',     'incident dictation');
-  appendField('sampleNarrative', inc.sampleNarrative,  'SAMPLE Narrative',  'incident dictation');
+  appendField('sampleNarrative', inc.sampleNarrative ? (typeof textToBullets === 'function' ? textToBullets(inc.sampleNarrative) : inc.sampleNarrative) : '', 'SAMPLE Narrative', 'incident dictation');
   setField('medications',        inc.medications,      'Medications',       'patient/photo info');
   setField('allergies',          inc.allergies,        'Allergies',         'patient/photo info');
 

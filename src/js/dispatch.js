@@ -3703,10 +3703,12 @@ async function processWithAI() {
     outputAuditLog(auditLog, chartState.callType);
     addAIResultCard(auditLog, chartState.callType);
     // After AI populates cards: resize textareas and recheck transport/refusal exclusivity
-    document.querySelectorAll('textarea[id^="vactivity-"]').forEach(ta => {
-      if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
-    });
-    if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
+    setTimeout(() => {
+      document.querySelectorAll('textarea').forEach(ta => {
+        if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
+      });
+      if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
+    }, 50);
 
   } catch(err) {
     progressBar.hide();
@@ -3912,7 +3914,7 @@ function applyAIResults(result, existingChart) {
   const inc = result.incident || {};
   setField('chiefComplaint',     inc.chiefComplaint,   'Chief Complaint',   'incident dictation');
   appendField('hpiNarrative',    inc.hpiNarrative,     'HPI Narrative',     'incident dictation');
-  appendField('sampleNarrative', inc.sampleNarrative,  'SAMPLE Narrative',  'incident dictation');
+  appendField('sampleNarrative', inc.sampleNarrative ? (typeof textToBullets === 'function' ? textToBullets(inc.sampleNarrative) : inc.sampleNarrative) : '', 'SAMPLE Narrative', 'incident dictation');
   setField('medications',        inc.medications,      'Medications',       'patient/photo info');
   setField('allergies',          inc.allergies,        'Allergies',         'patient/photo info');
 
