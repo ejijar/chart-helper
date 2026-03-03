@@ -3894,8 +3894,12 @@ function applyAIResults(result, existingChart) {
     if (!el) return;
     const existing = el.value && el.value.trim();
     el.value = existing ? existing + '\n' + value.toString().trim() : value.toString().trim();
-    el.dispatchEvent(new Event('input'));
-    requestAnimationFrame(() => { if (typeof autoResizeTextarea === 'function') autoResizeTextarea(el); });
+    requestAnimationFrame(() => {
+      el.style.height = 'auto';
+      requestAnimationFrame(() => {
+        el.style.height = el.scrollHeight + 'px';
+      });
+    });
     auditLog.push({ field: fieldLabel, action: existing ? 'updated' : 'populated', value: value.toString().trim(), source: source || 'AI extraction', reason: existing ? 'Appended to existing' : 'Field was empty' });
   };
 
