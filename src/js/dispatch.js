@@ -3743,13 +3743,13 @@ async function processWithAI() {
             'Patient Secured/Loaded': 'secured to stretcher',
           };
           const expectedText = pillOutputMap[pillText];
-          if (expectedText && notes.includes(expectedText)) {
+          if (expectedText && notes.toLowerCase().includes(expectedText.toLowerCase())) {
             pill.classList.add('selected');
           }
         });
       });
       if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
-    }, 50);
+    }, 200);
 
   } catch(err) {
     progressBar.hide();
