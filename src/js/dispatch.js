@@ -4039,6 +4039,18 @@ function outputAuditLog(auditLog, callType) {
     ta.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;height:120px;font-family:monospace;font-size:11px;background:#1a1a1a;color:#ccc;border:none;border-top:2px solid #f97316;padding:10px;box-sizing:border-box;z-index:9999;resize:vertical;max-height:300px;max-height:300px;';
     ta.placeholder = 'AI audit log — tap to select all and copy';
     ta.addEventListener('focus', function() { this.select(); });
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.id = 'aiAuditCloseBtn';
+    closeBtn.textContent = '✕ Close Log';
+    closeBtn.style.cssText = 'position:fixed;bottom:122px;right:12px;z-index:10000;background:#f97316;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:12px;font-weight:bold;cursor:pointer;';
+    closeBtn.addEventListener('click', function() {
+      const t = document.getElementById('aiAuditTextarea');
+      const b = document.getElementById('aiAuditCloseBtn');
+      if (t) t.remove();
+      if (b) b.remove();
+    });
+    document.body.appendChild(closeBtn);
     document.body.appendChild(ta);
   }
   ta.value = window._lastAuditLog;
