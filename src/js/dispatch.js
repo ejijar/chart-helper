@@ -3709,8 +3709,8 @@ async function processWithAI() {
         if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
       });
       // Sync activity pills — highlight any pill whose text appears in the activity notes
-      document.querySelectorAll('.vitals-card').forEach(card => {
-        const cardId = card.id.replace('vrow-', '');
+      document.querySelectorAll('[id^="vrow-"]').forEach(card => {
+        const cardId = card.id.replace("vrow-", "");
         const notesEl = document.getElementById('vactivity-' + cardId);
         if (!notesEl || !notesEl.value) return;
         const notes = notesEl.value;
