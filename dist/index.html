@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Chart Helper</title>
-<!-- Version: v10.0.83 -->
-<script>const APP_VERSION = 'v10.0.83';</script>
+<!-- Version: v10.0.84 -->
+<script>const APP_VERSION = 'v10.0.84';</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -9773,6 +9773,7 @@ async function processWithAI() {
       document.querySelectorAll('textarea').forEach(ta => {
         if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
       });
+      window.dispatchEvent(new Event('resize'));
       // Sync activity pills — highlight any pill whose text appears in the activity notes
       document.querySelectorAll('[id^="vrow-"]').forEach(card => {
         const cardId = card.id.replace("vrow-", "");
