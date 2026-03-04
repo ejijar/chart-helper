@@ -3903,6 +3903,10 @@ function applyAIResults(result, existingChart) {
     if (!el) return;
     const existing = el.value && el.value.trim();
     el.value = value.toString().trim();
+    if (id === 'whoCalled911') {
+      const pills = document.querySelectorAll('#whoCalled911Pills .tap-pill');
+      pills.forEach(p => { if (p.textContent.trim() === value.toString().trim()) selectWhoCalledPill(p, value.toString().trim()); });
+    }
     auditLog.push({ field: fieldLabel, action: existing ? 'updated' : 'populated', value: value.toString().trim(), source: source || 'AI extraction', reason: existing ? 'Overwrote: "' + existing + '"' : 'Field was empty' });
   };
 
