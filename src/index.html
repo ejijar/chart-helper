@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.95 -->
+<!-- Version: v10.0.96 -->
 <script>
-const APP_VERSION = 'v10.0.95';
+const APP_VERSION = 'v10.0.96';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -289,7 +289,7 @@ self.addEventListener('fetch', e => {
         <div class="sec-extract-status" id="sec-status-calltype"></div>
         <div class="form-row full">
           <div class="field">
-            <label>Call Type</label>
+            <label>CAD Call Type</label>
             <select id="callType" onchange="updateCallType()">
               <option value="">[Select]</option>
               <optgroup label="Cardiac">
@@ -701,6 +701,44 @@ self.addEventListener('fetch', e => {
         <div class="pt-extract-status" id="incidentExtractStatus"></div>
         <div class="transcript-history-content" id="incident-transcript-history" style="display:none">
           <div class="transcript-history-empty">No transcripts yet</div>
+        </div>
+        <div class="form-row full">
+          <div class="field">
+            <label>Clinical Call Type</label>
+            <select id="clinicalCallType">
+              <option value="">[Select]</option>
+              <optgroup label="Cardiac">
+              <option value="chest_pain">Chest Pain / Cardiac (ACS)</option>
+              <option value="cardiac_arrest">Cardiac Arrest</option>
+              </optgroup>
+              <optgroup label="Respiratory">
+              <option value="respiratory">Difficulty Breathing / Respiratory Distress</option>
+              </optgroup>
+              <optgroup label="Neurological">
+              <option value="stroke">Stroke / CVA</option>
+              <option value="seizure">Convulsions / Seizure</option>
+              <option value="syncope">Syncope / Unconscious Patient</option>
+              <option value="altered_ms">Altered Mental Status (AMS)</option>
+              </optgroup>
+              <optgroup label="Medical">
+              <option value="diabetic">Diabetic Emergency</option>
+              <option value="overdose">Overdose / Poisoning</option>
+              <option value="allergic">Allergic Reaction / Anaphylaxis</option>
+              <option value="psychiatric">Psychiatric / Behavioral Emergency</option>
+              <option value="obstetric">Obstetric Emergency / Childbirth</option>
+              <option value="pediatric">Pediatric Emergency (General)</option>
+              <option value="hypothermia_heat">Hypothermia / Heat Emergency</option>
+              </optgroup>
+              <optgroup label="Trauma">
+              <option value="trauma">Trauma / Injury</option>
+              <option value="mva">Motor Vehicle Accident (MVA)</option>
+              <option value="bleeding">Bleeding / Hemorrhage Control</option>
+              </optgroup>
+              <optgroup label="Other">
+              <option value="lift_assist">Fall / Lift Assist</option>
+              </optgroup>
+            </select>
+          </div>
         </div>
         <div class="form-row full">
           <div class="field">

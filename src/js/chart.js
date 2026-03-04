@@ -978,6 +978,7 @@ async function extractUniversalInfo(transcript, sourceSection) {
     "sceneNotes": ""
   },
   "incident": {
+    "clinicalCallType": "",
     "chiefComplaint": "",
     "hpiNarrative": "",
     "sampleNarrative": ""
@@ -1139,7 +1140,8 @@ Dictated text: "${transcript}"`;
     if (parsed.scene?.sceneNotes) appendField('sceneNotes', parsed.scene.sceneNotes, 'Scene Notes');
 
     // INCIDENT
-    if (parsed.incident?.chiefComplaint) setField('chiefComplaint',   parsed.incident.chiefComplaint, 'Chief Complaint');
+    if (parsed.incident?.chiefComplaint) setField('clinicalCallType',
+     'chiefComplaint',   parsed.incident.chiefComplaint, 'Chief Complaint');
     if (parsed.incident?.hpiNarrative)   appendField('hpiNarrative',  parsed.incident.hpiNarrative,   'HPI');
     if (parsed.incident?.sampleNarrative) appendField('sampleNarrative', parsed.incident.sampleNarrative, 'PMH/SAMPLE');
 
@@ -2092,6 +2094,7 @@ function buildEmailText() {
 
   // ── Incident ──
   sec('INCIDENT');
+  row('Clinical Call Type', callTypeLabels[d.clinicalCallType] || d.clinicalCallType || '—');
   row('Chief Complaint', d.chiefComplaint);
   L();
   block('HPI / OPQRST', d.hpiNarrative);
