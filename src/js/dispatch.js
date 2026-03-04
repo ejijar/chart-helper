@@ -636,16 +636,28 @@ function showUsernamePasswordPrompt(title, msg, onOk, onCancel) {
   document.getElementById('passwordPromptError').textContent = '';
   document.getElementById('passwordPromptUsernameWrap').style.display = 'block';
   modal.classList.add('show');
+  const usernameEl = document.getElementById('passwordPromptUsernameInput');
+  const passwordEl = document.getElementById('passwordPromptInput');
   const close = () => {
     modal.classList.remove('show');
-    document.getElementById('passwordPromptInput').value = '';
-    document.getElementById('passwordPromptUsernameInput').value = '';
+    passwordEl.value = '';
+    usernameEl.value = '';
     document.getElementById('passwordPromptError').textContent = '';
     document.getElementById('passwordPromptUsernameWrap').style.display = 'none';
+    usernameEl.removeEventListener('keydown', onUsernameKeydown);
+    passwordEl.removeEventListener('keydown', onPasswordKeydown);
   };
+  const onUsernameKeydown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); passwordEl.focus(); }
+  };
+  const onPasswordKeydown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('passwordPromptOk').click(); }
+  };
+  usernameEl.addEventListener('keydown', onUsernameKeydown);
+  passwordEl.addEventListener('keydown', onPasswordKeydown);
   document.getElementById('passwordPromptOk').onclick = () => {
-    const username = document.getElementById('passwordPromptUsernameInput').value.trim();
-    const pw = document.getElementById('passwordPromptInput').value.trim();
+    const username = usernameEl.value.trim();
+    const pw = passwordEl.value.trim();
     if (!username) {
       document.getElementById('passwordPromptError').textContent = 'Please enter a username.';
       return;
@@ -661,7 +673,7 @@ function showUsernamePasswordPrompt(title, msg, onOk, onCancel) {
     close();
     if (onCancel) onCancel();
   };
-  setTimeout(() => document.getElementById('passwordPromptUsernameInput').focus(), 50);
+  setTimeout(() => usernameEl.focus(), 50);
 }
 function showPasswordPrompt(title, msg, onOk, onCancel) {
   const modal = document.getElementById('passwordPromptModal');
