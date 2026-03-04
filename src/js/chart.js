@@ -2169,7 +2169,7 @@ function scanPlaceholders() {
     const hasPlaceholder = !!(matches && matches.length);
     if (hasPlaceholder) count += matches.length;
     // Yellow border on textareas with placeholders
-    el.style.borderColor = hasPlaceholder ? '#3a3000' : '';
+    el.style.borderColor = hasPlaceholder ? '#ffe066' : '';
     el.style.borderWidth = hasPlaceholder ? '2px' : '';
   });
 
@@ -2188,9 +2188,9 @@ function scanPlaceholders() {
   }
 
   // Yellow buttons + badge
-  const btnStyle = count > 0 ? '#3a3000' : '';
-  const btnColor = count > 0 ? '#c9a84c' : '';
-  const btnBorder = count > 0 ? '1px solid #a06c00' : '1px solid var(--border)';
+  const btnStyle = count > 0 ? '#ffe066' : '';
+  const btnColor = count > 0 ? '#7a5c00' : '';
+  const btnBorder = count > 0 ? '1px solid #d97706' : '1px solid var(--border)';
   ['copyChartBtn', 'shareChartBtn', 'emailChartBtn'].forEach(id => {
     const btn = document.getElementById(id);
     const badge = document.getElementById(id.replace('Btn', 'Badge'));
