@@ -1293,6 +1293,29 @@ function capturePhoto() {
   document.getElementById('photoInput').click();
 }
 
+// ── Photo compression ──────────────────────────────────────────────────────
+// Resizes to maxPx on longest side and re-encodes as JPEG at given quality.
+// Reduces API token cost ~12x, upload time, and save file size.
+function compressPhoto(dataURL, maxPx, quality) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxPx || height > maxPx) {
+        if (width >= height) { height = Math.round(height * maxPx / width); width = maxPx; }
+        else { width = Math.round(width * maxPx / height); height = maxPx; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataURL); // fallback: use original if compression fails
+    img.src = dataURL;
+  });
+}
+
 function handlePhoto(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -1302,7 +1325,9 @@ function handlePhoto(e) {
       const url = URL.createObjectURL(file);
       addBucketItem({ type: 'pdf', url, caption: file.name });
     } else {
-      addBucketItem({ type: 'photo', src: ev.target.result, caption: file.name });
+      compressPhoto(ev.target.result, 1200, 0.82).then(compressed => {
+        addBucketItem({ type: 'photo', src: compressed, caption: file.name });
+      });
     }
   };
   reader.readAsDataURL(file);
