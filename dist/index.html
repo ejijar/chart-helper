@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.123 -->
+<!-- Version: v10.0.124 -->
 <script>
-const APP_VERSION = 'v10.0.123';
+const APP_VERSION = 'v10.0.124';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -10226,6 +10226,7 @@ function showAIProgress() {
 
 function buildBucketSummary() {
   const parts = [];
+  const photoBlocks = [];
   bucketItems.forEach(item => {
     const ts = item.timestamp ? '[' + item.timestamp + ']' : '';
     const stage = item.stage ? '(' + item.stage + ')' : '';
@@ -10247,12 +10248,19 @@ function buildBucketSummary() {
       if (d.isRefusal) cadLines.push('  REFUSAL CALL');
       parts.push(cadLines.join('\n'));
     } else if (item.type === 'photo') {
-      parts.push('PHOTO ' + ts + ' ' + stage + ': "' + (item.caption || 'no caption') + '" — [image]');
+      const label = 'PHOTO ' + ts + ' ' + stage + ': "' + (item.caption || 'no caption') + '"';
+      parts.push(label + ' — [see image below]');
+      if (item.src && item.src.startsWith('data:')) {
+        const match = item.src.match(/^data:(image\/\w+);base64,(.+)$/);
+        if (match) {
+          photoBlocks.push({ label, mediaType: match[1], data: match[2] });
+        }
+      }
     } else if (item.type === 'pdf') {
       parts.push('PDF ' + ts + ' ' + stage + ': "' + (item.caption || 'document') + '"');
     }
   });
-  return parts.join('\n\n---\n\n');
+  return { text: parts.join('\n\n---\n\n'), photoBlocks };
 }
 
 function buildProcessingMessage(chartState, bucketSummary) {
@@ -10264,189 +10272,19 @@ function buildProcessingMessage(chartState, bucketSummary) {
     const hasData = c.bp || c.hr || c.rr || c.spo2 || c.activity;
     return 'Card ' + c.id + ' "' + c.label + '": ' + (hasData ? 'has some data' : 'empty');
   }).join('\n');
-  return 'CALL TYPE: ' + (chartState.callType || 'not set') + '\n\nFIELDS ALREADY CONTAINING DATA (do not overwrite unless clearly more accurate):\n' + (existing.length ? existing.join(', ') : 'None') + '\n\nCURRENT ACTIVITY CARDS:\n' + (cardSummary || 'No cards') + '\n\n═══════════════════════════════\nRAW CALL DATA\n═══════════════════════════════\n' + (bucketSummary || '(no bucket items)') + '\n\nReturn JSON only.';
-}
-
-function applyAIResults(result, existingChart) {
-  const auditLog = [];
-
-  const setField = (id, value, fieldLabel, source) => {
-    if (!value || !value.toString().trim()) {
-      auditLog.push({ field: fieldLabel, action: 'skipped', value: null, source: source || 'not found', reason: 'No value returned by Claude' });
-      return;
-    }
-    const el = document.getElementById(id);
-    if (!el) return;
-    const existing = el.value && el.value.trim();
-    el.value = value.toString().trim();
-    if (id === 'whoCalled911') {
-      const pills = document.querySelectorAll('#whoCalled911Pills .tap-pill');
-      pills.forEach(p => { if (p.textContent.trim() === value.toString().trim()) selectWhoCalledPill(p, value.toString().trim()); });
-    }
-    auditLog.push({ field: fieldLabel, action: existing ? 'updated' : 'populated', value: value.toString().trim(), source: source || 'AI extraction', reason: existing ? 'Overwrote: "' + existing + '"' : 'Field was empty' });
-  };
-
-  const appendField = (id, value, fieldLabel, source) => {
-    if (!value || !value.toString().trim()) {
-      auditLog.push({ field: fieldLabel, action: 'skipped', value: null, source: source || 'not found', reason: 'No value returned by Claude' });
-      return;
-    }
-    const el = document.getElementById(id);
-    if (!el) return;
-    const existing = el.value && el.value.trim();
-    el.value = existing ? existing + '\n' + value.toString().trim() : value.toString().trim();
-    requestAnimationFrame(() => {
-      el.style.height = 'auto';
-      requestAnimationFrame(() => {
-        el.style.height = el.scrollHeight + 'px';
-      });
-    });
-    auditLog.push({ field: fieldLabel, action: existing ? 'updated' : 'populated', value: value.toString().trim(), source: source || 'AI extraction', reason: existing ? 'Appended to existing' : 'Field was empty' });
-  };
-
-  const p = result.patient || {};
-  setField('patientName',    p.patientName,    'Patient Name',    'patient info');
-  setField('patientDOB',     p.patientDOB,     'Patient DOB',     'patient info');
-  setField('patientAge',     p.patientAge,     'Patient Age',     'patient info');
-  setField('patientAddress', p.patientAddress, 'Patient Address', 'patient info');
-  setField('patientCity',    p.patientCity,    'Patient City',    'patient info');
-  setField('patientState',   p.patientState,   'Patient State',   'patient info');
-  setField('patientZip',     p.patientZip,     'Patient Zip',     'patient info');
-  setField('patientPhone',   p.patientPhone,   'Patient Phone',   'patient info');
-
-  if (p.patientSex === 'male' || p.patientSex === 'female') {
-    const el = document.getElementById('patientSex');
-    if (el) {
-      el.value = p.patientSex;
-      document.querySelectorAll('#sexPills .tap-pill').forEach(pill => {
-        pill.classList.toggle('selected', pill.textContent.trim().toLowerCase() === p.patientSex);
-      });
-      auditLog.push({ field: 'Patient Sex', action: 'populated', value: p.patientSex, source: 'explicit statement', reason: '' });
-    }
-  } else {
-    auditLog.push({ field: 'Patient Sex', action: 'skipped', value: null, source: 'not found', reason: 'Not explicitly stated' });
-  }
-
-  const d = result.dispatch || {};
-  if (d.callType) {
-    const el = document.getElementById('callType');
-    if (el) { el.value = d.callType; if (typeof updateCallType === 'function') updateCallType(); }
-    auditLog.push({ field: 'Call Type', action: 'populated', value: d.callType, source: 'inference', reason: '' });
-  } else {
-    auditLog.push({ field: 'Call Type', action: 'skipped', value: null, source: 'not found', reason: 'Could not determine call type' });
-  }
-  setField('incidentLocation', d.incidentLocation, 'Incident Location', 'CAD or dictation');
-  setField('whoCalled911',     d.whoCalled911,     'Who Called 911',    'dictation');
-
-  const sc = result.scene || {};
-  const validLOC = ['Alert and Oriented x4','Alert and Oriented x3','Alert and Oriented x2','Alert and Oriented x1','Altered Mental Status','Unconscious'];
-  if (sc.patientLOC && validLOC.includes(sc.patientLOC)) {
-    const el = document.getElementById('patientLOC');
-    if (el) {
-      el.value = sc.patientLOC;
-      document.querySelectorAll('#locAlertPills .tap-pill').forEach(pill => {
-        const txt = pill.textContent.trim();
-        const match = (txt === 'Alert' && sc.patientLOC.startsWith('Alert')) ||
-                      (txt === 'Altered' && sc.patientLOC === 'Altered Mental Status') ||
-                      (txt === 'Unconscious' && sc.patientLOC === 'Unconscious');
-        if (match) pill.classList.add('active');
-      });
-    }
-    auditLog.push({ field: 'Level of Consciousness', action: 'populated', value: sc.patientLOC, source: 'scene dictation', reason: '' });
-  } else {
-    auditLog.push({ field: 'Level of Consciousness', action: 'skipped', value: null, source: 'not found', reason: sc.patientLOC ? '"' + sc.patientLOC + '" did not match valid LOC options' : 'Not mentioned' });
-  }
-  appendField('sceneNotes', sc.sceneNotes, 'Scene Notes', 'scene dictation');
-
-  const inc = result.incident || {};
-  setField('chiefComplaint',     inc.chiefComplaint,   'Chief Complaint',   'incident dictation');
-  appendField('hpiNarrative',    inc.hpiNarrative,     'HPI Narrative',     'incident dictation');
-  appendField('sampleNarrative', inc.sampleNarrative ? (typeof textToBullets === 'function' ? textToBullets(inc.sampleNarrative) : inc.sampleNarrative) : '', 'SAMPLE Narrative', 'incident dictation');
-  setField('medications',        inc.medications,      'Medications',       'patient/photo info');
-  setField('allergies',          inc.allergies,        'Allergies',         'patient/photo info');
-
-  (result.activityCards || []).forEach(card => {
-    const id = card.cardId;
-    if (!id) return;
-    const label = card.label || 'Card ' + id;
-    [
-      ['time',      'vt-' + id,         'Time'],
-      ['bp',        'vbp-' + id,        'BP'],
-      ['hr',        'vhr-' + id,        'HR'],
-      ['rr',        'vrr-' + id,        'RR'],
-      ['spo2',      'vspo2-' + id,      'SpO2'],
-      ['pain',      'vpain-' + id,      'Pain'],
-      ['skin',      'vskin-' + id,      'Skin'],
-      ['temp',      'vtemp-' + id,      'Temp'],
-      ['glucose',   'vglucose-' + id,   'Glucose'],
-      ['gcsEye',    'vgcs-eye-' + id,   'GCS Eye'],
-      ['gcsVerbal', 'vgcs-verbal-' + id,'GCS Verbal'],
-      ['gcsMotor',  'vgcs-motor-' + id, 'GCS Motor'],
-      ['edRoom',    'ved-room-' + id,   'ED Room'],
-    ].forEach(([key, domId, shortLabel]) => {
-      setField(domId, card[key], label + ' — ' + shortLabel, 'activity notes');
-    });
-    if (card.gcsEye || card.gcsVerbal || card.gcsMotor) {
-      if (typeof updateGCS === 'function') updateGCS(id);
-    }
-    appendField('vactivity-' + id, card.activityNotes, label + ' — Activity Notes', 'activity notes');
-    if (id === 3 && card.hospSelected) {
-      const wrap = document.getElementById('vhosp-pills-' + id);
-      if (wrap) {
-        wrap.querySelectorAll('.transport-hosp-pill').forEach(pill => {
-          pill.classList.toggle('selected', pill.textContent.trim().toLowerCase().includes(card.hospSelected.toLowerCase()));
-        });
-        auditLog.push({ field: 'Transport — Hospital', action: 'populated', value: card.hospSelected, source: 'CAD or dictation', reason: '' });
-      }
-    }
+  const headerText = 'CALL TYPE: ' + (chartState.callType || 'not set')
+    + '\n\nFIELDS ALREADY CONTAINING DATA (do not overwrite unless clearly more accurate):\n'
+    + (existing.length ? existing.join(', ') : 'None')
+    + '\n\nCURRENT ACTIVITY CARDS:\n' + (cardSummary || 'No cards')
+    + '\n\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nRAW CALL DATA\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n'
+    + (bucketSummary.text || '(no bucket items)')
+    + '\n\nReturn JSON only.';
+  const contentBlocks = [{ type: 'text', text: headerText }];
+  (bucketSummary.photoBlocks || []).forEach(photo => {
+    contentBlocks.push({ type: 'text', text: 'On-scene photo — ' + photo.label + ':' });
+    contentBlocks.push({ type: 'image', source: { type: 'base64', media_type: photo.mediaType, data: photo.data } });
   });
-
-  if (Array.isArray(result.auditLog)) {
-    result.auditLog.forEach(entry => {
-      if (!auditLog.some(e => e.field === entry.field)) auditLog.push(entry);
-    });
-  }
-
-  return auditLog;
-}
-
-function outputAuditLog(auditLog, callType) {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' });
-  const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-
-  console.group('%c🚑 AI AUDIT LOG — ' + dateStr + ' ' + timeStr, 'color:#f97316;font-weight:bold;font-size:14px;');
-  console.log('Call Type:', callType || '(not set)');
-  console.table(auditLog.map(e => ({ Field: e.field, Action: e.action, Value: e.value || '—', Source: e.source || '—', Reason: e.reason || '—' })));
-  const p = auditLog.filter(e => e.action === 'populated').length;
-  const u = auditLog.filter(e => e.action === 'updated').length;
-  const s = auditLog.filter(e => e.action === 'skipped').length;
-  console.log('Summary: ' + p + ' populated, ' + u + ' updated, ' + s + ' skipped');
-  console.groupEnd();
-
-  window._lastAuditLog = buildAuditEmailText(auditLog, callType, dateStr, timeStr);
-
-}
-
-
-// Copy audit log to clipboard
-function copyAuditLog() {
-  if (!window._lastAuditLog) {
-    alert('No audit log available.');
-    return;
-  }
-  navigator.clipboard.writeText(window._lastAuditLog).then(() => {
-    const btns = document.querySelectorAll('button');
-    btns.forEach(b => { if (b.textContent.includes('Copy Audit Log')) { b.textContent = '✓ Copied!'; setTimeout(() => { b.innerHTML = '&#x2398; Copy Audit Log'; }, 2000); } });
-  }).catch(() => {
-    // Fallback
-    const ta = document.createElement('textarea');
-    ta.value = window._lastAuditLog;
-    ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy');
-    ta.remove();
-  });
+  return contentBlocks;
 }
 function buildAuditEmailText(auditLog, callType, dateStr, timeStr) {
   const SEP  = '════════════════════════════════════════';
