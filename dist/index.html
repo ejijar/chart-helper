@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.111 -->
+<!-- Version: v10.0.112 -->
 <script>
-const APP_VERSION = 'v10.0.111';
+const APP_VERSION = 'v10.0.112';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -7943,6 +7943,114 @@ function shareMedia() {
       }
     });
 }
+
+
+// ── Lightbox pinch-zoom ────────────────────────────────────────────────────
+(function initLightboxPinchZoom() {
+  let scale = 1, lastScale = 1;
+  let originX = 0, originY = 0;
+  let translateX = 0, translateY = 0;
+  let lastTranslateX = 0, lastTranslateY = 0;
+  let isPinching = false;
+  let isSingleDrag = false;
+  let lastMidX = 0, lastMidY = 0;
+  let singleStartX = 0, singleStartY = 0;
+
+  function getImg() { return document.getElementById('lightboxImg'); }
+
+  function applyTransform(img) {
+    img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    img.style.transformOrigin = `${originX}px ${originY}px`;
+  }
+
+  function resetTransform() {
+    scale = 1; lastScale = 1;
+    translateX = 0; translateY = 0;
+    lastTranslateX = 0; lastTranslateY = 0;
+    originX = 0; originY = 0;
+    const img = getImg();
+    if (img) { img.style.transform = ''; img.style.transformOrigin = ''; }
+  }
+
+  function dist(t) {
+    const dx = t[0].clientX - t[1].clientX;
+    const dy = t[0].clientY - t[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function mid(t) {
+    return {
+      x: (t[0].clientX + t[1].clientX) / 2,
+      y: (t[0].clientY + t[1].clientY) / 2
+    };
+  }
+
+  let startDist = 0;
+
+  document.addEventListener('touchstart', (e) => {
+    const overlay = document.getElementById('mediaLightbox');
+    if (!overlay || !overlay.classList.contains('open')) return;
+    const img = getImg();
+    if (!img) return;
+
+    if (e.touches.length === 2) {
+      isPinching = true;
+      isSingleDrag = false;
+      e.preventDefault();
+      startDist = dist(e.touches);
+      lastScale = scale;
+      const m = mid(e.touches);
+      const rect = img.getBoundingClientRect();
+      originX = m.x - rect.left;
+      originY = m.y - rect.top;
+      lastMidX = m.x;
+      lastMidY = m.y;
+      lastTranslateX = translateX;
+      lastTranslateY = translateY;
+    } else if (e.touches.length === 1 && scale > 1) {
+      isSingleDrag = true;
+      singleStartX = e.touches[0].clientX - translateX;
+      singleStartY = e.touches[0].clientY - translateY;
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    const overlay = document.getElementById('mediaLightbox');
+    if (!overlay || !overlay.classList.contains('open')) return;
+    const img = getImg();
+    if (!img) return;
+
+    if (isPinching && e.touches.length === 2) {
+      e.preventDefault();
+      const newDist = dist(e.touches);
+      scale = Math.min(4, Math.max(1, lastScale * (newDist / startDist)));
+      const m = mid(e.touches);
+      translateX = lastTranslateX + (m.x - lastMidX);
+      translateY = lastTranslateY + (m.y - lastMidY);
+      applyTransform(img);
+    } else if (isSingleDrag && e.touches.length === 1) {
+      e.preventDefault();
+      translateX = e.touches[0].clientX - singleStartX;
+      translateY = e.touches[0].clientY - singleStartY;
+      applyTransform(img);
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) isPinching = false;
+    if (e.touches.length === 0) {
+      isSingleDrag = false;
+      if (scale < 1.05) resetTransform();
+    }
+  });
+
+  // Reset when lightbox closes
+  const origClose = window.closeLightbox;
+  window.closeLightbox = function() {
+    resetTransform();
+    if (origClose) origClose();
+  };
+})();
 
 function openPDF(url) {
   window.open(url, '_blank');
