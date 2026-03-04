@@ -1140,8 +1140,7 @@ Dictated text: "${transcript}"`;
     if (parsed.scene?.sceneNotes) appendField('sceneNotes', parsed.scene.sceneNotes, 'Scene Notes');
 
     // INCIDENT
-    if (parsed.incident?.chiefComplaint) setField('clinicalCallType',
-     'chiefComplaint',   parsed.incident.chiefComplaint, 'Chief Complaint');
+    if (parsed.incident?.chiefComplaint) setField('chiefComplaint',   parsed.incident.chiefComplaint, 'Chief Complaint');
     if (parsed.incident?.hpiNarrative)   appendField('hpiNarrative',  parsed.incident.hpiNarrative,   'HPI');
     if (parsed.incident?.sampleNarrative) appendField('sampleNarrative', parsed.incident.sampleNarrative, 'PMH/SAMPLE');
 
@@ -2742,7 +2741,7 @@ function newChart() {
 function _doClearChart() {
     // Clear all form fields
     ['patientName','patientDOB','patientAge','patientAddress',
-     'patientPhone','patientWeight','chiefComplaint',
+     'patientPhone','patientWeight','clinicalCallType','chiefComplaint',
      'hpiNarrative','sampleNarrative',
      'sampleSigns','sampleLastIntake','sampleEvents',
      'medHistory','medications','allergies','patientSkin','patientTemp','patientGlucose',
