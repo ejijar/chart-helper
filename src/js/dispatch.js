@@ -3964,6 +3964,7 @@ async function processWithAI() {
       });
       if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
       updateAIBtn(); // re-run after layout settles
+      if (typeof scanPlaceholders === "function") scanPlaceholders();
     }, 500);
 
   } catch(err) {

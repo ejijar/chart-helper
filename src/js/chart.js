@@ -2155,6 +2155,37 @@ function buildEmailText() {
   return lines.join(NL);
 }
 
+function scanPlaceholders() {
+  const PLACEHOLDER_RE = /\[[^\]]+\]/g;
+  const ids = ['sceneNotes', 'hpiNarrative', 'sampleNarrative'];
+  // also catch dynamic vactivity textareas
+  document.querySelectorAll('textarea[id^="vactivity-"]').forEach(ta => ids.push(ta.id));
+
+  let count = 0;
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && PLACEHOLDER_RE.test(el.value)) {
+      PLACEHOLDER_RE.lastIndex = 0;
+      const matches = el.value.match(/\[[^\]]+\]/g);
+      if (matches) count += matches.length;
+    }
+  });
+
+  const banner = document.getElementById('placeholderBanner');
+  const bannerText = document.getElementById('placeholderBannerText');
+  if (banner && bannerText) {
+    if (count > 0) {
+      bannerText.textContent = count === 1
+        ? '1 placeholder still needs to be filled in.'
+        : `${count} placeholders still need to be filled in.`;
+      banner.style.display = 'flex';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+  return count;
+}
+
 function sendChartEmail() {
   const body = buildEmailText() + (window._lastAuditLog || "");
   const d = collectChartData();
@@ -2165,6 +2196,11 @@ function sendChartEmail() {
   const toAddress = accountSettings.email || '';
   const mailto = `mailto:${encodeURIComponent(toAddress)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
+  // Warn if placeholders remain
+  const remaining = scanPlaceholders();
+  if (remaining > 0) {
+    showToast('warning', 'Placeholders Remaining', `${remaining} placeholder${remaining === 1 ? '' : 's'} still need to be filled in before sending.`);
+  }
   // Open mail — works on iOS to open Mail app with draft pre-filled
   window.location.href = mailto;
 }

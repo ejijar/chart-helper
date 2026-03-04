@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.119 -->
+<!-- Version: v10.0.120 -->
 <script>
-const APP_VERSION = 'v10.0.119';
+const APP_VERSION = 'v10.0.120';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -542,6 +542,8 @@ self.addEventListener('fetch', e => {
 
   <!-- ====== CHART TAB ====== -->
   <div id="tab-chart" style="display:none">
+
+    <div id="placeholderBanner" style="display:none; background:#ffe066; color:#7a5c00; font-size:13px; font-weight:600; padding:8px 14px; border-radius:8px; margin:10px 12px 0 12px; align-items:center; gap:8px;"><span style="font-size:16px;">⚠️</span><span id="placeholderBannerText"></span></div>
 
     <!-- PATIENT INFO -->
     <div class="section">

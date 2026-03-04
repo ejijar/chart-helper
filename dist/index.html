@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.119 -->
+<!-- Version: v10.0.120 -->
 <script>
-const APP_VERSION = 'v10.0.119';
+const APP_VERSION = 'v10.0.120';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -5217,6 +5217,8 @@ self.addEventListener('fetch', e => {
   <!-- ====== CHART TAB ====== -->
   <div id="tab-chart" style="display:none">
 
+    <div id="placeholderBanner" style="display:none; background:#ffe066; color:#7a5c00; font-size:13px; font-weight:600; padding:8px 14px; border-radius:8px; margin:10px 12px 0 12px; align-items:center; gap:8px;"><span style="font-size:16px;">⚠️</span><span id="placeholderBannerText"></span></div>
+
     <!-- PATIENT INFO -->
     <div class="section">
       <div class="section-header" onclick="toggleSection('patient')">
@@ -10150,6 +10152,7 @@ async function processWithAI() {
       });
       if (typeof checkTransportRefusalExclusivity === 'function') checkTransportRefusalExclusivity();
       updateAIBtn(); // re-run after layout settles
+      if (typeof scanPlaceholders === "function") scanPlaceholders();
     }, 500);
 
   } catch(err) {
@@ -13980,6 +13983,37 @@ function buildEmailText() {
   return lines.join(NL);
 }
 
+function scanPlaceholders() {
+  const PLACEHOLDER_RE = /\[[^\]]+\]/g;
+  const ids = ['sceneNotes', 'hpiNarrative', 'sampleNarrative'];
+  // also catch dynamic vactivity textareas
+  document.querySelectorAll('textarea[id^="vactivity-"]').forEach(ta => ids.push(ta.id));
+
+  let count = 0;
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && PLACEHOLDER_RE.test(el.value)) {
+      PLACEHOLDER_RE.lastIndex = 0;
+      const matches = el.value.match(/\[[^\]]+\]/g);
+      if (matches) count += matches.length;
+    }
+  });
+
+  const banner = document.getElementById('placeholderBanner');
+  const bannerText = document.getElementById('placeholderBannerText');
+  if (banner && bannerText) {
+    if (count > 0) {
+      bannerText.textContent = count === 1
+        ? '1 placeholder still needs to be filled in.'
+        : `${count} placeholders still need to be filled in.`;
+      banner.style.display = 'flex';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+  return count;
+}
+
 function sendChartEmail() {
   const body = buildEmailText() + (window._lastAuditLog || "");
   const d = collectChartData();
@@ -13990,6 +14024,11 @@ function sendChartEmail() {
   const toAddress = accountSettings.email || '';
   const mailto = `mailto:${encodeURIComponent(toAddress)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
+  // Warn if placeholders remain
+  const remaining = scanPlaceholders();
+  if (remaining > 0) {
+    showToast('warning', 'Placeholders Remaining', `${remaining} placeholder${remaining === 1 ? '' : 's'} still need to be filled in before sending.`);
+  }
   // Open mail — works on iOS to open Mail app with draft pre-filled
   window.location.href = mailto;
 }
