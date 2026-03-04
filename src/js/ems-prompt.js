@@ -157,6 +157,8 @@ CALL-TYPE SPECIFIC GUIDANCE:
 - mva: note vehicle damage, patient position, airbags, c-spine precautions
 - lift_assist: note how found, whether injury occurred, whether refused transport
 
+DISPATCH FIELDS:
+- whoCalled911: MUST be exactly one of: 'Patient', 'Spouse', 'Relative', 'Bystander', 'Other' - map caller relationship to closest match. 'husband' or 'wife' → 'Spouse', 'son', 'daughter', 'brother', 'sister' → 'Relative', 'neighbor', 'passerby' → 'Bystander'. Leave blank if unknown.
 AUDIT LOG: For every field evaluated, include an entry:
 { "field": "field name", "action": "populated|updated|skipped", "value": "value or null", "source": "where it came from", "reason": "explanation especially for skipped" }
 
