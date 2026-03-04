@@ -4098,6 +4098,144 @@ function buildProcessingMessage(chartState, bucketSummary) {
   });
   return contentBlocks;
 }
+function applyAIResults(result, existingChart) {
+  const auditLog = [];
+
+  const setField = (id, value, fieldLabel, source) => {
+    if (!value || !value.toString().trim()) {
+      auditLog.push({ field: fieldLabel, action: 'skipped', value: null, source: source || 'not found', reason: 'No value returned by Claude' });
+      return;
+    }
+    const el = document.getElementById(id);
+    if (!el) return;
+    const existing = el.value && el.value.trim();
+    el.value = value.toString().trim();
+    if (id === 'whoCalled911') {
+      const pills = document.querySelectorAll('#whoCalled911Pills .tap-pill');
+      pills.forEach(p => { if (p.textContent.trim() === value.toString().trim()) selectWhoCalledPill(p, value.toString().trim()); });
+    }
+    auditLog.push({ field: fieldLabel, action: existing ? 'updated' : 'populated', value: value.toString().trim(), source: source || 'AI extraction', reason: existing ? 'Overwrote: "' + existing + '"' : 'Field was empty' });
+  };
+
+  const appendField = (id, value, fieldLabel, source) => {
+    if (!value || !value.toString().trim()) {
+      auditLog.push({ field: fieldLabel, action: 'skipped', value: null, source: source || 'not found', reason: 'No value returned by Claude' });
+      return;
+    }
+    const el = document.getElementById(id);
+    if (!el) return;
+    const existing = el.value && el.value.trim();
+    el.value = existing ? existing + '\n' + value.toString().trim() : value.toString().trim();
+    requestAnimationFrame(() => {
+      el.style.height = 'auto';
+      requestAnimationFrame(() => {
+        el.style.height = el.scrollHeight + 'px';
+      });
+    });
+    auditLog.push({ field: fieldLabel, action: existing ? 'updated' : 'populated', value: value.toString().trim(), source: source || 'AI extraction', reason: existing ? 'Appended to existing' : 'Field was empty' });
+  };
+
+  const p = result.patient || {};
+  setField('patientName',    p.patientName,    'Patient Name',    'patient info');
+  setField('patientDOB',     p.patientDOB,     'Patient DOB',     'patient info');
+  setField('patientAge',     p.patientAge,     'Patient Age',     'patient info');
+  setField('patientAddress', p.patientAddress, 'Patient Address', 'patient info');
+  setField('patientCity',    p.patientCity,    'Patient City',    'patient info');
+  setField('patientState',   p.patientState,   'Patient State',   'patient info');
+  setField('patientZip',     p.patientZip,     'Patient Zip',     'patient info');
+  setField('patientPhone',   p.patientPhone,   'Patient Phone',   'patient info');
+
+  if (p.patientSex === 'male' || p.patientSex === 'female') {
+    const el = document.getElementById('patientSex');
+    if (el) {
+      el.value = p.patientSex;
+      document.querySelectorAll('#sexPills .tap-pill').forEach(pill => {
+        pill.classList.toggle('selected', pill.textContent.trim().toLowerCase() === p.patientSex);
+      });
+      auditLog.push({ field: 'Patient Sex', action: 'populated', value: p.patientSex, source: 'explicit statement', reason: '' });
+    }
+  } else {
+    auditLog.push({ field: 'Patient Sex', action: 'skipped', value: null, source: 'not found', reason: 'Not explicitly stated' });
+  }
+
+  const d = result.dispatch || {};
+  if (d.callType) {
+    const el = document.getElementById('callType');
+    if (el) { el.value = d.callType; if (typeof updateCallType === 'function') updateCallType(); }
+    auditLog.push({ field: 'Call Type', action: 'populated', value: d.callType, source: 'inference', reason: '' });
+  } else {
+    auditLog.push({ field: 'Call Type', action: 'skipped', value: null, source: 'not found', reason: 'Could not determine call type' });
+  }
+  setField('incidentLocation', d.incidentLocation, 'Incident Location', 'CAD or dictation');
+  setField('whoCalled911',     d.whoCalled911,     'Who Called 911',    'dictation');
+
+  const sc = result.scene || {};
+  const validLOC = ['Alert and Oriented x4','Alert and Oriented x3','Alert and Oriented x2','Alert and Oriented x1','Altered Mental Status','Unconscious'];
+  if (sc.patientLOC && validLOC.includes(sc.patientLOC)) {
+    const el = document.getElementById('patientLOC');
+    if (el) {
+      el.value = sc.patientLOC;
+      document.querySelectorAll('#locAlertPills .tap-pill').forEach(pill => {
+        const txt = pill.textContent.trim();
+        const match = (txt === 'Alert' && sc.patientLOC.startsWith('Alert')) ||
+                      (txt === 'Altered' && sc.patientLOC === 'Altered Mental Status') ||
+                      (txt === 'Unconscious' && sc.patientLOC === 'Unconscious');
+        if (match) pill.classList.add('active');
+      });
+    }
+    auditLog.push({ field: 'Level of Consciousness', action: 'populated', value: sc.patientLOC, source: 'scene dictation', reason: '' });
+  } else {
+    auditLog.push({ field: 'Level of Consciousness', action: 'skipped', value: null, source: 'not found', reason: sc.patientLOC ? '"' + sc.patientLOC + '" did not match valid LOC options' : 'Not mentioned' });
+  }
+  appendField('sceneNotes', sc.sceneNotes, 'Scene Notes', 'scene dictation');
+  const inc = result.incident || {};
+  setField('chiefComplaint',     inc.chiefComplaint,   'Chief Complaint',   'incident dictation');
+  appendField('hpiNarrative',    inc.hpiNarrative,     'HPI Narrative',     'incident dictation');
+  appendField('sampleNarrative', inc.sampleNarrative ? (typeof textToBullets === 'function' ? textToBullets(inc.sampleNarrative) : inc.sampleNarrative) : '', 'SAMPLE Narrative', 'incident dictation');
+  setField('medications',        inc.medications,      'Medications',       'patient/photo info');
+  setField('allergies',          inc.allergies,        'Allergies',         'patient/photo info');
+  (result.activityCards || []).forEach(card => {
+    const id = card.cardId;
+    if (!id) return;
+    const label = card.label || 'Card ' + id;
+    [
+      ['time',      'vt-' + id,         'Time'],
+      ['bp',        'vbp-' + id,        'BP'],
+      ['hr',        'vhr-' + id,        'HR'],
+      ['rr',        'vrr-' + id,        'RR'],
+      ['spo2',      'vspo2-' + id,      'SpO2'],
+      ['pain',      'vpain-' + id,      'Pain'],
+      ['skin',      'vskin-' + id,      'Skin'],
+      ['temp',      'vtemp-' + id,      'Temp'],
+      ['glucose',   'vglucose-' + id,   'Glucose'],
+      ['gcsEye',    'vgcs-eye-' + id,   'GCS Eye'],
+      ['gcsVerbal', 'vgcs-verbal-' + id,'GCS Verbal'],
+      ['gcsMotor',  'vgcs-motor-' + id, 'GCS Motor'],
+      ['edRoom',    'ved-room-' + id,   'ED Room'],
+    ].forEach(([key, domId, shortLabel]) => {
+      setField(domId, card[key], label + ' — ' + shortLabel, 'activity notes');
+    });
+    if (card.gcsEye || card.gcsVerbal || card.gcsMotor) {
+      if (typeof updateGCS === 'function') updateGCS(id);
+    }
+    appendField('vactivity-' + id, card.activityNotes, label + ' — Activity Notes', 'activity notes');
+    if (id === 3 && card.hospSelected) {
+      const wrap = document.getElementById('vhosp-pills-' + id);
+      if (wrap) {
+        wrap.querySelectorAll('.transport-hosp-pill').forEach(pill => {
+          pill.classList.toggle('selected', pill.textContent.trim().toLowerCase().includes(card.hospSelected.toLowerCase()));
+        });
+        auditLog.push({ field: 'Transport — Hospital', action: 'populated', value: card.hospSelected, source: 'CAD or dictation', reason: '' });
+      }
+    }
+  });
+  if (Array.isArray(result.auditLog)) {
+    result.auditLog.forEach(entry => {
+      if (!auditLog.some(e => e.field === entry.field)) auditLog.push(entry);
+    });
+  }
+  return auditLog;
+}
 function buildAuditEmailText(auditLog, callType, dateStr, timeStr) {
   const SEP  = '════════════════════════════════════════';
   const THIN = '────────────────────────────────────────';
