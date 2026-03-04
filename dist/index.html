@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.127 -->
+<!-- Version: v10.0.128 -->
 <script>
-const APP_VERSION = 'v10.0.127';
+const APP_VERSION = 'v10.0.128';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -6068,6 +6068,7 @@ ACTIVITY CARDS - VITALS ASSIGNMENT BY CARD:
 - Transport (cardId 3): vitals only if explicitly re-assessed en route.
 - Hospital Transfer (cardId 4): vitals only if explicitly re-assessed on arrival.
 - BUNDLED VITALS RULE: If a single note contains multiple vitals together (e.g. 'HR 88, BP 142/86, RR 16, SpO2 97%') with no indication they were taken at different times, place ALL of them on cardId 2. Never split bundled vitals.
+- PHOTO VITALS TABLE RULE: If a photo contains a vitals table with multiple rows, treat each row as a fully atomic set. ALL values in a single row (BP, HR, RR, SpO2, etc.) belong together on one card and must never be split across cards or mixed with values from a different row or a different source. Map each row to a card by its timestamp (e.g. 7PM row → cardId 2, 7:15 row → cardId 3). Photo vitals take precedence over note-sourced vitals for the same card — overwrite the note value, do not blend or average. If a cell in the photo row is blank, leave that field empty on the card rather than pulling it from notes.
 - SpO2 AND HR PAIRING: SpO2 and HR are always measured together by pulse oximeter. Never put them on different cards.
 - RESPIRATORY RATE CARRY-FORWARD: RR may be carried to subsequent cards unchanged UNLESS source indicates a status change. Never guess a new RR.
 
