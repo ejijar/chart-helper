@@ -32,7 +32,7 @@ CARDINAL RULES - NEVER VIOLATE THESE:
 
 FIELD POPULATION RULES:
 
-PATIENT: name, DOB (YYYY-MM-DD), age (number only if explicitly stated), sex (male/female explicit only), address, city, state, zip, phone
+PATIENT: name, DOB (MM/DD/YYYY format always — convert from any format found in source), age (number only — extract from explicit statement OR from a photo "Age" field), sex (male/female explicit only), address, city, state, zip, phone
 
 SCENE:
 - patientLOC: MUST be exactly one of: 'Alert and Oriented x4', 'Alert and Oriented x3', 'Alert and Oriented x2', 'Alert and Oriented x1', 'Altered Mental Status', 'Unconscious' - or '' if not mentioned
@@ -45,6 +45,7 @@ INCIDENT:
   * Express it in the patient's voice: 'My right hip hurts' - per patient
   * If ONLY a mechanism is given with no symptom mentioned at all, use: [What is the patient's chief complaint?]
   * Always a complete sentence in quotes with '- per [source]' attribution.
+- hpiNarrative: If a photo contains an HPI Onset field (e.g. '(HPI) Onset: 6PM'), incorporate the onset time into the narrative (e.g. 'onset at 6PM'). Do not leave onset as a placeholder if it is visible in a photo.
 - hpiNarrative: Format: '[Age] year-old [sex] patient was [doing X] when [event occurred]. Patient [actions taken before EMS]. [Who called 911?]' Use bracketed placeholders for unknowns. Always end with who called 911.
 - sampleNarrative: SAMPLE details. Write as plain prose sentences - the app will format as bullets automatically. Include PMH, medications, allergies, last intake, events. Use placeholders for missing elements: [Other PMH?] [Allergies?] [Last oral intake?]
 - medications: only if explicitly stated or visible in photo
