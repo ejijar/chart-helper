@@ -1146,9 +1146,10 @@ function updateGCS(id) {
 }
 
 function autoResizeTextarea(textarea) {
-  textarea.style.overflow = 'hidden';
+  textarea.style.overflow = 'visible';
   textarea.style.height = 'auto';
   textarea.style.height = textarea.scrollHeight + 'px';
+  textarea.style.overflow = 'hidden';
 }
 
 // ── Bulleted textarea helpers (HPI / PMH) ─────────────────────────────────

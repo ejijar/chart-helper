@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.102 -->
+<!-- Version: v10.0.103 -->
 <script>
-const APP_VERSION = 'v10.0.102';
+const APP_VERSION = 'v10.0.103';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -9906,13 +9906,25 @@ async function processWithAI() {
     // After AI populates cards: resize textareas, sync pills, recheck exclusivity
     setTimeout(() => {
       document.querySelectorAll('textarea:not(#aiAuditTextarea)').forEach(ta => {
+        const before = { h: ta.style.height, scroll: ta.scrollHeight, val: ta.value.length };
         if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
+        const after = ta.style.height;
+        if (ta.value.trim()) console.log('[RESIZE pass1]', ta.id, 'scrollH:', before.scroll, 'valLen:', before.val, 'before:', before.h, '-> after:', after);
       });
       // Second pass after layout fully settles
       setTimeout(() => {
         document.querySelectorAll('textarea:not(#aiAuditTextarea)').forEach(ta => {
+          const before = { h: ta.style.height, scroll: ta.scrollHeight };
           if (typeof autoResizeTextarea === 'function') autoResizeTextarea(ta);
+          const after = ta.style.height;
+          if (ta.value.trim()) console.log('[RESIZE pass2]', ta.id, 'scrollH:', before.scroll, 'before:', before.h, '-> after:', after);
         });
+        // Check heights 100ms after pass2 to see if anything resets them
+        setTimeout(() => {
+          document.querySelectorAll('textarea:not(#aiAuditTextarea)').forEach(ta => {
+            if (ta.value.trim()) console.log('[RESIZE check]', ta.id, 'height now:', ta.style.height, 'scrollH:', ta.scrollHeight);
+          });
+        }, 100);
       }, 600);
 
       // Sync activity pills — highlight any pill whose text appears in the activity notes
@@ -11478,9 +11490,10 @@ function updateGCS(id) {
 }
 
 function autoResizeTextarea(textarea) {
-  textarea.style.overflow = 'hidden';
+  textarea.style.overflow = 'visible';
   textarea.style.height = 'auto';
   textarea.style.height = textarea.scrollHeight + 'px';
+  textarea.style.overflow = 'hidden';
 }
 
 // ── Bulleted textarea helpers (HPI / PMH) ─────────────────────────────────
