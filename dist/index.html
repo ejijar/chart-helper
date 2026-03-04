@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.125 -->
+<!-- Version: v10.0.126 -->
 <script>
-const APP_VERSION = 'v10.0.125';
+const APP_VERSION = 'v10.0.126';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -10424,6 +10424,42 @@ function applyAIResults(result, existingChart) {
   }
   return auditLog;
 }
+function outputAuditLog(auditLog, callType) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+
+  console.group('%c\uD83D\uDE91 AI AUDIT LOG \u2014 ' + dateStr + ' ' + timeStr, 'color:#f97316;font-weight:bold;font-size:14px;');
+  console.log('Call Type:', callType || '(not set)');
+  console.table(auditLog.map(e => ({ Field: e.field, Action: e.action, Value: e.value || '\u2014', Source: e.source || '\u2014', Reason: e.reason || '\u2014' })));
+  const p = auditLog.filter(e => e.action === 'populated').length;
+  const u = auditLog.filter(e => e.action === 'updated').length;
+  const s = auditLog.filter(e => e.action === 'skipped').length;
+  console.log('Summary: ' + p + ' populated, ' + u + ' updated, ' + s + ' skipped');
+  console.groupEnd();
+
+  window._lastAuditLog = buildAuditEmailText(auditLog, callType, dateStr, timeStr);
+}
+
+function copyAuditLog() {
+  if (!window._lastAuditLog) {
+    alert('No audit log available.');
+    return;
+  }
+  navigator.clipboard.writeText(window._lastAuditLog).then(() => {
+    const btns = document.querySelectorAll('button');
+    btns.forEach(b => { if (b.textContent.includes('Copy Audit Log')) { b.textContent = '\u2713 Copied!'; setTimeout(() => { b.innerHTML = '&#x2398; Copy Audit Log'; }, 2000); } });
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = window._lastAuditLog;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    ta.remove();
+  });
+}
+
+
 function buildAuditEmailText(auditLog, callType, dateStr, timeStr) {
   const SEP  = '════════════════════════════════════════';
   const THIN = '────────────────────────────────────────';
