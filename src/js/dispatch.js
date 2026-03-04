@@ -1326,7 +1326,8 @@ function handlePhoto(e) {
       addBucketItem({ type: 'pdf', url, caption: file.name });
     } else {
       compressPhoto(ev.target.result, 1200, 0.82).then(compressed => {
-        addBucketItem({ type: 'photo', src: compressed, caption: file.name });
+        const photoNum = bucketItems.filter(i => i.type === 'photo').length + 1;
+        addBucketItem({ type: 'photo', src: compressed, caption: `On-Scene Image ${photoNum}.jpg` });
       });
     }
   };
