@@ -45,7 +45,7 @@ INCIDENT:
   * Express it in the patient's voice: 'My right hip hurts' - per patient
   * If ONLY a mechanism is given with no symptom mentioned at all, use: [What is the patient's chief complaint?]
   * Always a complete sentence in quotes with '- per [source]' attribution.
-- hpiNarrative: Format: '[Age] year-old [sex] patient was [doing X] when [event occurred]. Patient [actions taken before EMS]. [Who] called 911.' Use bracketed placeholders for unknowns. Always end with who called 911.
+- hpiNarrative: Format: '[Age] year-old [sex] patient was [doing X] when [event occurred]. Patient [actions taken before EMS]. [Who called 911?]' Use bracketed placeholders for unknowns. Always end with who called 911.
 - sampleNarrative: SAMPLE details. Write as plain prose sentences - the app will format as bullets automatically. Include PMH, medications, allergies, last intake, events. Use placeholders for missing elements: [Other PMH?] [Allergies?] [Last oral intake?]
 - medications: only if explicitly stated or visible in photo
 - allergies: only if explicitly stated
