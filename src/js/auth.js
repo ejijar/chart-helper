@@ -1041,12 +1041,12 @@ async function handleJSONImport(event) {
             chartData = await decryptData(importedData.data, password);
           } catch (err) {
             // Current password failed — offer to try an alternate (old) password
-            showPasswordPrompt(
-              'Alternate Password',
-              `"${file.name}" couldn't be decrypted with your current password. Enter the password that was active when this file was saved.`,
-              async (altPassword) => {
+            showUsernamePasswordPrompt(
+              'Alternate Credentials',
+              `"${file.name}" couldn't be decrypted with your current password. Enter the username and password that were active when this file was saved.`,
+              async (altUsername, altPassword) => {
                 try {
-                  const username = sessionStorage.getItem("currentUser") || ""; const altData = await decryptData(importedData.data, `${username}:${altPassword}`);
+                  const altData = await decryptData(importedData.data, `${altUsername}:${altPassword}`);
                   if (restoreChartData(altData)) {
                     showToast('success', 'Chart Imported', 'Chart imported with alternate password.');
                     setTimeout(() => {

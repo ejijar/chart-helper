@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.106 -->
+<!-- Version: v10.0.107 -->
 <script>
-const APP_VERSION = 'v10.0.106';
+const APP_VERSION = 'v10.0.107';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -1398,12 +1398,20 @@ self.addEventListener('fetch', e => {
     <div class="confirm-title" id="passwordPromptTitle">Enter Password</div>
     <div class="confirm-msg" id="passwordPromptMsg"></div>
     <div style="margin: 12px 0;">
+      <div id="passwordPromptUsernameWrap" style="display:none; margin-bottom:8px;">
+        <input type="text" id="passwordPromptUsernameInput" class="auth-input"
+          placeholder="Enter username"
+          style="width:100%; box-sizing:border-box; padding:8px 10px; border-radius:6px;
+                 border:1px solid var(--border); background:var(--surface2); color:var(--text);
+                 font-size:14px; font-family:var(--mono);"
+          onkeydown="if(event.key==='Enter') document.getElementById('passwordPromptInput').focus()">
+      </div>
       <input type="password" id="passwordPromptInput" class="auth-input"
         placeholder="Enter password"
         style="width:100%; box-sizing:border-box; padding:8px 10px; border-radius:6px;
                border:1px solid var(--border); background:var(--surface2); color:var(--text);
                font-size:14px; font-family:var(--mono);"
-        onkeydown="if(event.key==='Enter') document.getElementById('passwordPromptOk').click()">
+        onkeydown="if(event.key='Enter') document.getElementById('passwordPromptOk').click()">
       <div id="passwordPromptError" style="color:var(--danger); font-size:12px; margin-top:6px; min-height:16px;"></div>
     </div>
     <div class="confirm-btns">

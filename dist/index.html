@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.106 -->
+<!-- Version: v10.0.107 -->
 <script>
-const APP_VERSION = 'v10.0.106';
+const APP_VERSION = 'v10.0.107';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -6807,6 +6807,42 @@ function showConfirm(title, msg, okLabel, okDanger, onOk, onCancel, cancelLabel)
   cancelBtn.onclick = () => { close(); if (onCancel) onCancel(); };
 }
 
+function showUsernamePasswordPrompt(title, msg, onOk, onCancel) {
+  const modal = document.getElementById('passwordPromptModal');
+  document.getElementById('passwordPromptTitle').textContent = title;
+  document.getElementById('passwordPromptMsg').textContent = msg;
+  document.getElementById('passwordPromptInput').value = '';
+  document.getElementById('passwordPromptUsernameInput').value = '';
+  document.getElementById('passwordPromptError').textContent = '';
+  document.getElementById('passwordPromptUsernameWrap').style.display = 'block';
+  modal.classList.add('show');
+  const close = () => {
+    modal.classList.remove('show');
+    document.getElementById('passwordPromptInput').value = '';
+    document.getElementById('passwordPromptUsernameInput').value = '';
+    document.getElementById('passwordPromptError').textContent = '';
+    document.getElementById('passwordPromptUsernameWrap').style.display = 'none';
+  };
+  document.getElementById('passwordPromptOk').onclick = () => {
+    const username = document.getElementById('passwordPromptUsernameInput').value.trim();
+    const pw = document.getElementById('passwordPromptInput').value.trim();
+    if (!username) {
+      document.getElementById('passwordPromptError').textContent = 'Please enter a username.';
+      return;
+    }
+    if (!pw) {
+      document.getElementById('passwordPromptError').textContent = 'Please enter a password.';
+      return;
+    }
+    close();
+    if (onOk) onOk(username, pw);
+  };
+  document.getElementById('passwordPromptCancel').onclick = () => {
+    close();
+    if (onCancel) onCancel();
+  };
+  setTimeout(() => document.getElementById('passwordPromptUsernameInput').focus(), 50);
+}
 function showPasswordPrompt(title, msg, onOk, onCancel) {
   const modal = document.getElementById('passwordPromptModal');
   document.getElementById('passwordPromptTitle').textContent = title;
@@ -17010,12 +17046,12 @@ async function handleJSONImport(event) {
             chartData = await decryptData(importedData.data, password);
           } catch (err) {
             // Current password failed — offer to try an alternate (old) password
-            showPasswordPrompt(
-              'Alternate Password',
-              `"${file.name}" couldn't be decrypted with your current password. Enter the password that was active when this file was saved.`,
-              async (altPassword) => {
+            showUsernamePasswordPrompt(
+              'Alternate Credentials',
+              `"${file.name}" couldn't be decrypted with your current password. Enter the username and password that were active when this file was saved.`,
+              async (altUsername, altPassword) => {
                 try {
-                  const username = sessionStorage.getItem("currentUser") || ""; const altData = await decryptData(importedData.data, `${username}:${altPassword}`);
+                  const altData = await decryptData(importedData.data, `${altUsername}:${altPassword}`);
                   if (restoreChartData(altData)) {
                     showToast('success', 'Chart Imported', 'Chart imported with alternate password.');
                     setTimeout(() => {
@@ -17158,12 +17194,20 @@ function loadScript(src) {
     <div class="confirm-title" id="passwordPromptTitle">Enter Password</div>
     <div class="confirm-msg" id="passwordPromptMsg"></div>
     <div style="margin: 12px 0;">
+      <div id="passwordPromptUsernameWrap" style="display:none; margin-bottom:8px;">
+        <input type="text" id="passwordPromptUsernameInput" class="auth-input"
+          placeholder="Enter username"
+          style="width:100%; box-sizing:border-box; padding:8px 10px; border-radius:6px;
+                 border:1px solid var(--border); background:var(--surface2); color:var(--text);
+                 font-size:14px; font-family:var(--mono);"
+          onkeydown="if(event.key==='Enter') document.getElementById('passwordPromptInput').focus()">
+      </div>
       <input type="password" id="passwordPromptInput" class="auth-input"
         placeholder="Enter password"
         style="width:100%; box-sizing:border-box; padding:8px 10px; border-radius:6px;
                border:1px solid var(--border); background:var(--surface2); color:var(--text);
                font-size:14px; font-family:var(--mono);"
-        onkeydown="if(event.key==='Enter') document.getElementById('passwordPromptOk').click()">
+        onkeydown="if(event.key='Enter') document.getElementById('passwordPromptOk').click()">
       <div id="passwordPromptError" style="color:var(--danger); font-size:12px; margin-top:6px; min-height:16px;"></div>
     </div>
     <div class="confirm-btns">

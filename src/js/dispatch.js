@@ -627,6 +627,42 @@ function showConfirm(title, msg, okLabel, okDanger, onOk, onCancel, cancelLabel)
   cancelBtn.onclick = () => { close(); if (onCancel) onCancel(); };
 }
 
+function showUsernamePasswordPrompt(title, msg, onOk, onCancel) {
+  const modal = document.getElementById('passwordPromptModal');
+  document.getElementById('passwordPromptTitle').textContent = title;
+  document.getElementById('passwordPromptMsg').textContent = msg;
+  document.getElementById('passwordPromptInput').value = '';
+  document.getElementById('passwordPromptUsernameInput').value = '';
+  document.getElementById('passwordPromptError').textContent = '';
+  document.getElementById('passwordPromptUsernameWrap').style.display = 'block';
+  modal.classList.add('show');
+  const close = () => {
+    modal.classList.remove('show');
+    document.getElementById('passwordPromptInput').value = '';
+    document.getElementById('passwordPromptUsernameInput').value = '';
+    document.getElementById('passwordPromptError').textContent = '';
+    document.getElementById('passwordPromptUsernameWrap').style.display = 'none';
+  };
+  document.getElementById('passwordPromptOk').onclick = () => {
+    const username = document.getElementById('passwordPromptUsernameInput').value.trim();
+    const pw = document.getElementById('passwordPromptInput').value.trim();
+    if (!username) {
+      document.getElementById('passwordPromptError').textContent = 'Please enter a username.';
+      return;
+    }
+    if (!pw) {
+      document.getElementById('passwordPromptError').textContent = 'Please enter a password.';
+      return;
+    }
+    close();
+    if (onOk) onOk(username, pw);
+  };
+  document.getElementById('passwordPromptCancel').onclick = () => {
+    close();
+    if (onCancel) onCancel();
+  };
+  setTimeout(() => document.getElementById('passwordPromptUsernameInput').focus(), 50);
+}
 function showPasswordPrompt(title, msg, onOk, onCancel) {
   const modal = document.getElementById('passwordPromptModal');
   document.getElementById('passwordPromptTitle').textContent = title;
