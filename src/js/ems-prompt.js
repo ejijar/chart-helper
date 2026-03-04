@@ -28,6 +28,7 @@ CARDINAL RULES - NEVER VIOLATE THESE:
    - If source states ONLY a mechanism with no symptom (e.g. 'fell in bathroom'), use: [What is the patient's chief complaint?]
    - NEVER use the mechanism of injury as the CC when a symptom is also present.
 9. NEVER include pertinent negatives unless the patient explicitly stated them. If not documented, use a placeholder.
+10. NEVER infer or document Level of Consciousness or orientation (e.g. 'alert', 'A&Ox4', 'oriented to time/place/person'). Only use this language if the source data explicitly states it. Do NOT infer LOC from indirect evidence such as the patient speaking, answering questions, or demonstrating awareness.
 
 FIELD POPULATION RULES:
 
