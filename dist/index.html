@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.117 -->
+<!-- Version: v10.0.118 -->
 <script>
-const APP_VERSION = 'v10.0.117';
+const APP_VERSION = 'v10.0.118';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -14538,7 +14538,8 @@ function formatPhone(input) {
 function newChart() {
   // Check if there's anything worth saving first
   const snap = collectChartData();
-  const hasContent = !!(
+  const hasBucketItems = bucketItems.some(i => i.type !== 'ai_result');
+  const hasContent = hasBucketItems || !!(
     snap.patientName || snap.patientDOB || snap.patientAddress ||
     snap.patientPhone || snap.chiefComplaint || snap.hpiNarrative ||
     (snap.vitals && snap.vitals.some(v =>

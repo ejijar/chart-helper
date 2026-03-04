@@ -2713,7 +2713,8 @@ function formatPhone(input) {
 function newChart() {
   // Check if there's anything worth saving first
   const snap = collectChartData();
-  const hasContent = !!(
+  const hasBucketItems = bucketItems.some(i => i.type !== 'ai_result');
+  const hasContent = hasBucketItems || !!(
     snap.patientName || snap.patientDOB || snap.patientAddress ||
     snap.patientPhone || snap.chiefComplaint || snap.hpiNarrative ||
     (snap.vitals && snap.vitals.some(v =>
