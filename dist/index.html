@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.104 -->
+<!-- Version: v10.0.105 -->
 <script>
-const APP_VERSION = 'v10.0.104';
+const APP_VERSION = 'v10.0.105';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -11490,9 +11490,21 @@ function updateGCS(id) {
 }
 
 function autoResizeTextarea(textarea) {
+  // Temporarily unhide any display:none ancestors so scrollHeight can be measured
+  const hidden = [];
+  let el = textarea.parentElement;
+  while (el) {
+    if (getComputedStyle(el).display === 'none') {
+      hidden.push({ el, prev: el.style.display });
+      el.style.display = 'block';
+    }
+    el = el.parentElement;
+  }
   textarea.style.overflow = 'visible';
   textarea.style.height = textarea.scrollHeight + 'px';
   textarea.style.overflow = 'hidden';
+  // Restore hidden ancestors
+  hidden.forEach(({ el, prev }) => { el.style.display = prev; });
 }
 
 // ── Bulleted textarea helpers (HPI / PMH) ─────────────────────────────────

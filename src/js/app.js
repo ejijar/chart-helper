@@ -1146,9 +1146,21 @@ function updateGCS(id) {
 }
 
 function autoResizeTextarea(textarea) {
+  // Temporarily unhide any display:none ancestors so scrollHeight can be measured
+  const hidden = [];
+  let el = textarea.parentElement;
+  while (el) {
+    if (getComputedStyle(el).display === 'none') {
+      hidden.push({ el, prev: el.style.display });
+      el.style.display = 'block';
+    }
+    el = el.parentElement;
+  }
   textarea.style.overflow = 'visible';
   textarea.style.height = textarea.scrollHeight + 'px';
   textarea.style.overflow = 'hidden';
+  // Restore hidden ancestors
+  hidden.forEach(({ el, prev }) => { el.style.display = prev; });
 }
 
 // ── Bulleted textarea helpers (HPI / PMH) ─────────────────────────────────
