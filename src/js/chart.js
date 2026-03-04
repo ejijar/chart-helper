@@ -2158,19 +2158,22 @@ function buildEmailText() {
 function scanPlaceholders() {
   const PLACEHOLDER_RE = /\[[^\]]+\]/g;
   const ids = ['sceneNotes', 'hpiNarrative', 'sampleNarrative'];
-  // also catch dynamic vactivity textareas
   document.querySelectorAll('textarea[id^="vactivity-"]').forEach(ta => ids.push(ta.id));
 
   let count = 0;
   ids.forEach(id => {
     const el = document.getElementById(id);
-    if (el && PLACEHOLDER_RE.test(el.value)) {
-      PLACEHOLDER_RE.lastIndex = 0;
-      const matches = el.value.match(/\[[^\]]+\]/g);
-      if (matches) count += matches.length;
-    }
+    if (!el) return;
+    PLACEHOLDER_RE.lastIndex = 0;
+    const matches = el.value.match(/\[[^\]]+\]/g);
+    const hasPlaceholder = !!(matches && matches.length);
+    if (hasPlaceholder) count += matches.length;
+    // Yellow border on textareas with placeholders
+    el.style.borderColor = hasPlaceholder ? '#ffe066' : '';
+    el.style.borderWidth = hasPlaceholder ? '2px' : '';
   });
 
+  // Banner
   const banner = document.getElementById('placeholderBanner');
   const bannerText = document.getElementById('placeholderBannerText');
   if (banner && bannerText) {
@@ -2183,6 +2186,29 @@ function scanPlaceholders() {
       banner.style.display = 'none';
     }
   }
+
+  // Yellow buttons + badge
+  const btnStyle = count > 0 ? '#ffe066' : '';
+  const btnColor = count > 0 ? '#7a5c00' : '';
+  const btnBorder = count > 0 ? '1px solid #d97706' : '1px solid var(--border)';
+  ['copyChartBtn', 'shareChartBtn', 'emailChartBtn'].forEach(id => {
+    const btn = document.getElementById(id);
+    const badge = document.getElementById(id.replace('Btn', 'Badge'));
+    if (btn) {
+      btn.style.background = btnStyle;
+      btn.style.color = btnColor;
+      btn.style.border = btnBorder;
+    }
+    if (badge) {
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  });
+
   return count;
 }
 
@@ -2196,11 +2222,6 @@ function sendChartEmail() {
   const toAddress = accountSettings.email || '';
   const mailto = `mailto:${encodeURIComponent(toAddress)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-  // Warn if placeholders remain
-  const remaining = scanPlaceholders();
-  if (remaining > 0) {
-    showToast('warning', 'Placeholders Remaining', `${remaining} placeholder${remaining === 1 ? '' : 's'} still need to be filled in before sending.`);
-  }
   // Open mail — works on iOS to open Mail app with draft pre-filled
   window.location.href = mailto;
 }
