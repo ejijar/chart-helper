@@ -1938,6 +1938,7 @@ function processWithAI_REPLACED() {
     if (['input','select','textarea','button','canvas'].includes(tag)) return;
 
     const tabs = Array.from(document.querySelectorAll('.tab'));
+    const activeTab = document.querySelector('.tab.active');
     const currentIdx = tabs.indexOf(activeTab);
 
     let nextIdx;
