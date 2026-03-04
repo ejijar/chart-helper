@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.114 -->
+<!-- Version: v10.0.115 -->
 <script>
-const APP_VERSION = 'v10.0.114';
+const APP_VERSION = 'v10.0.115';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -517,7 +517,7 @@ self.addEventListener('fetch', e => {
     <div class="media-lightbox" id="mediaLightbox">
       <div class="lightbox-backdrop" onclick="closeLightbox()"></div>
       <div class="lightbox-content">
-        <img class="lightbox-img" id="lightboxImg" src="" alt="Scene photo">
+        <div class="lightbox-img-wrap"><img class="lightbox-img" id="lightboxImg" src="" alt="Scene photo"></div>
         <div class="lightbox-footer">
           <span class="lightbox-caption" id="lightboxCaption"></span>
           <div class="lightbox-actions">
