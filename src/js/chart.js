@@ -2093,7 +2093,10 @@ function buildEmailText() {
 
   // ── Incident ──
   sec('INCIDENT');
-  row('Clinical Call Type', callTypeLabels[d.clinicalCallType] || d.clinicalCallType || '—');
+  const clinicalCTEl = document.getElementById('clinicalCallType');
+  const clinicalCTVal = clinicalCTEl ? clinicalCTEl.value : '';
+  const clinicalCTLabel = clinicalCTEl && clinicalCTEl.selectedOptions[0] ? clinicalCTEl.selectedOptions[0].text : '';
+  row('Clinical Call Type', (clinicalCTLabel && clinicalCTLabel !== '[Select]') ? clinicalCTLabel : (clinicalCTVal || '—'));
   row('Chief Complaint', d.chiefComplaint);
   L();
   block('HPI / OPQRST', d.hpiNarrative);

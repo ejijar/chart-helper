@@ -387,6 +387,7 @@ function collectChartData() {
     
     // Call Type
     callType: document.getElementById('callType')?.value || '',
+    clinicalCallType: document.getElementById('clinicalCallType')?.value || '',
     incidentLocation: document.getElementById('incidentLocation')?.value || '',
     whoCalled911: document.getElementById('whoCalled911')?.value || '',
     whoCalled911Other: document.getElementById('whoCalled911Other')?.value || '',
@@ -588,6 +589,7 @@ function restoreChartData(data) {
   }
   
   // Restore Incident Info
+  if (document.getElementById('clinicalCallType')) document.getElementById('clinicalCallType').value = data.clinicalCallType || '';
   if (document.getElementById('chiefComplaint')) document.getElementById('chiefComplaint').value = data.chiefComplaint || '';
   if (document.getElementById('hpiNarrative')) document.getElementById('hpiNarrative').value = data.hpiNarrative || '';
   if (document.getElementById('sampleNarrative')) document.getElementById('sampleNarrative').value = data.sampleNarrative || '';
