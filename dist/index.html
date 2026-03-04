@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.116 -->
+<!-- Version: v10.0.117 -->
 <script>
-const APP_VERSION = 'v10.0.116';
+const APP_VERSION = 'v10.0.117';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -17149,14 +17149,23 @@ async function exportToJSON() {
     
     const jsonString = JSON.stringify(exportPackage, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    
-    URL.revokeObjectURL(url);
+
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIOS && navigator.share) {
+      const file = new File([blob], filename, { type: 'application/json' });
+      try {
+        await navigator.share({ files: [file], title: filename });
+      } catch (shareErr) {
+        if (shareErr.name !== 'AbortError') throw shareErr;
+      }
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
     showToast('success', 'Chart Exported', `Saved as ${filename}. You will need your password to import it.`);
   } catch (err) {
     showToast('error', 'Export Failed', err.message);
