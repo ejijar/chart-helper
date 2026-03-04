@@ -1005,8 +1005,10 @@ async function exportToJSON() {
       const file = new File([blob], filename, { type: 'application/json' });
       try {
         await navigator.share({ files: [file], title: filename });
+        showToast('success', 'Chart Exported', `Saved as ${filename}. You will need your password to import it.`);
       } catch (shareErr) {
         if (shareErr.name !== 'AbortError') throw shareErr;
+        // User dismissed share sheet — no toast
       }
     } else {
       const url = URL.createObjectURL(blob);
@@ -1015,8 +1017,8 @@ async function exportToJSON() {
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
+      showToast('success', 'Chart Exported', `Saved as ${filename}. You will need your password to import it.`);
     }
-    showToast('success', 'Chart Exported', `Saved as ${filename}. You will need your password to import it.`);
   } catch (err) {
     showToast('error', 'Export Failed', err.message);
   }
