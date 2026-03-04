@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.121 -->
+<!-- Version: v10.0.122 -->
 <script>
-const APP_VERSION = 'v10.0.121';
+const APP_VERSION = 'v10.0.122';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -543,7 +543,7 @@ self.addEventListener('fetch', e => {
   <!-- ====== CHART TAB ====== -->
   <div id="tab-chart" style="display:none">
 
-    <div id="placeholderBanner" style="display:none; background:#ffe066; color:#7a5c00; font-size:13px; font-weight:600; padding:8px 14px; border-radius:8px; margin:10px 12px 10px 12px; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a5c00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span id="placeholderBannerText"></span></div>
+    <div id="placeholderBanner" style="display:none; background:#4a3f00; color:#c9a84c; font-size:13px; font-weight:600; padding:8px 14px; border-radius:8px; margin:10px 12px 10px 12px; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span id="placeholderBannerText"></span></div>
 
     <!-- PATIENT INFO -->
     <div class="section">
@@ -810,13 +810,13 @@ self.addEventListener('fetch', e => {
     <!-- Chart Export -->
     <div style="margin-top:16px; padding: 0 0 16px 0; display:flex; gap:8px; flex-wrap:wrap;">
       <button id="copyChartBtn" class="generate-btn" onclick="copyChartToClipboard()" style="flex:1; background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);margin:0; min-width:0; position:relative;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy Chart<span id="copyChartBadge" style="display:none; position:absolute; top:-6px; right:-6px; background:#d97706; color:#fff; font-size:10px; font-weight:700; border-radius:999px; padding:1px 5px; line-height:1.4;"></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy Chart<span id="copyChartBadge" style="display:none; position:absolute; top:-6px; right:-6px; background:#a06c00; color:#fff; font-size:10px; font-weight:700; border-radius:999px; padding:1px 5px; line-height:1.4;"></span>
       </button>
       <button id="shareChartBtn" class="generate-btn" onclick="shareChart()" style="flex:1; background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);margin:0; min-width:0; position:relative;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Share<span id="shareChartBadge" style="display:none; position:absolute; top:-6px; right:-6px; background:#d97706; color:#fff; font-size:10px; font-weight:700; border-radius:999px; padding:1px 5px; line-height:1.4;"></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Share<span id="shareChartBadge" style="display:none; position:absolute; top:-6px; right:-6px; background:#a06c00; color:#fff; font-size:10px; font-weight:700; border-radius:999px; padding:1px 5px; line-height:1.4;"></span>
       </button>
       <button id="emailChartBtn" class="generate-btn" onclick="sendChartEmail()" style="flex:1; background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);margin:0; min-width:0; position:relative;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Email<span id="emailChartBadge" style="display:none; position:absolute; top:-6px; right:-6px; background:#d97706; color:#fff; font-size:10px; font-weight:700; border-radius:999px; padding:1px 5px; line-height:1.4;"></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Email<span id="emailChartBadge" style="display:none; position:absolute; top:-6px; right:-6px; background:#a06c00; color:#fff; font-size:10px; font-weight:700; border-radius:999px; padding:1px 5px; line-height:1.4;"></span>
       </button>
     </div>
     <div id="copyChartStatus" style="font-family:var(--mono);font-size:11px;color:var(--success);text-align:center;margin-top:6px;min-height:16px;"></div>
