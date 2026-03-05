@@ -4506,12 +4506,32 @@
 .bucket-empty-text { font-family: var(--mono); font-size: 13px; text-align: center; line-height: 1.6; }
 
 .feed-item-processed {
-  border-left: 3px solid var(--success) !important;
-  background: var(--surface-alt, rgba(128,128,128,0.08)) !important;
+  /* no muting — bubble stays fully readable */
 }
-.feed-item-processed .feed-item-header { opacity: 0.55; }
-.feed-item-processed .feed-item-body { opacity: 0.55; }
-.feed-item-processed .feed-item-type { color: var(--success); opacity: 1; }
+.feed-item-processed .feed-item-header { opacity: 1; }
+.feed-item-processed .feed-item-body { opacity: 1; }
+.feed-item-processed .feed-item-type { opacity: 1; }
+
+/* Delivered-style badge sits below the bubble */
+.feed-item-processed .feed-processed-badge {
+  display: block;
+}
+.feed-processed-badge {
+  display: none;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--success);
+  margin-top: 4px;
+  padding: 0 4px;
+}
+.feed-bubble-user .feed-processed-badge {
+  text-align: right;
+  padding-right: 6px;
+}
+.feed-bubble-system .feed-processed-badge {
+  text-align: left;
+  padding-left: 6px;
+}
 
 .feed-item {
   border-radius: 18px;
