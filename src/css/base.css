@@ -4528,27 +4528,27 @@
 /* System bubbles (CAD, AI result) — left aligned, dark */
 .feed-bubble-system {
   float: left;
-  background: #111;
-  border: 1px solid #2a2a2a;
-  color: #e0e0e0;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
   border-radius: 18px 18px 18px 4px;
 }
 .feed-bubble-system .feed-item-header {
-  border-bottom-color: #2a2a2a;
+  border-bottom-color: var(--border);
 }
 .feed-bubble-system .feed-item-type,
 .feed-bubble-system .feed-item-icon,
 .feed-bubble-system .feed-item-time {
-  color: #666;
+  color: var(--text-muted);
 }
 .feed-bubble-system .cad-card-label,
 .feed-bubble-system .cad-summary-label,
 .feed-bubble-system .cad-card-empty {
-  color: #555;
+  color: var(--text-dim);
 }
 .feed-bubble-system .cad-card-value,
 .feed-bubble-system .cad-tap-hint {
-  color: #bbb;
+  color: var(--text);
 }
 
 /* User bubbles (note, photo, pdf, voice) — right aligned, blue */
@@ -4585,6 +4585,12 @@
 .feed-bubble-user .feed-item-delete:hover {
   color: #ff7070;
 }
+/* Light mode: brighter blue for user bubbles */
+.light-mode .feed-bubble-user,
+@media (prefers-color-scheme: light) { .feed-bubble-user } {
+  background: #1d6ae5;
+  border-color: #1a5dc7;
+}
 
 /* Clearfix so bucket scrolls past floats */
 .bucket::after {
@@ -4597,27 +4603,29 @@
 .feed-bubble-system.bubble-tail::after {
   content: '';
   position: absolute;
-  bottom: -11px;
-  left: 16px;
-  width: 0;
-  height: 0;
-  border-left: 11px solid #111;
-  border-right: 4px solid transparent;
-  border-bottom: 11px solid transparent;
-  border-top: 0;
+  bottom: -6px;
+  left: 18px;
+  width: 12px;
+  height: 12px;
+  background: var(--surface2);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transform: rotate(45deg);
+  border-radius: 0 0 3px 0;
 }
 
 .feed-bubble-user.bubble-tail::after {
   content: '';
   position: absolute;
-  bottom: -11px;
-  right: 16px;
-  width: 0;
-  height: 0;
-  border-right: 11px solid #1a4a8a;
-  border-left: 4px solid transparent;
-  border-bottom: 11px solid transparent;
-  border-top: 0;
+  bottom: -6px;
+  right: 18px;
+  width: 12px;
+  height: 12px;
+  background: #1a4a8a;
+  border-right: 1px solid #1e5299;
+  border-bottom: 1px solid #1e5299;
+  transform: rotate(45deg);
+  border-radius: 0 0 3px 0;
 }
 .feed-item-header {
   display: flex; align-items: center; gap: 8px;
