@@ -1612,10 +1612,13 @@ function renderBucket() {
   if (!bucket) return;
   empty.style.display = bucketItems.length ? 'none' : 'flex';
   bucket.querySelectorAll('.feed-item').forEach(el => el.remove());
+  const SYSTEM_TYPES = ['cad', 'ai_result'];
   bucketItems.forEach(item => {
     const el = document.createElement('div');
+    const isSystem = SYSTEM_TYPES.includes(item.type);
     const isEmptyCAD = item.type === 'cad' && !(item.data && (item.data.onScene || item.data.depart || item.data.hospital || item.data.rts || item.data.dest));
-    el.className = 'feed-item' + (item.processed && !isEmptyCAD ? ' feed-item-processed' : '');
+    const bubbleClass = isSystem ? 'feed-bubble-system' : 'feed-bubble-user';
+    el.className = 'feed-item ' + bubbleClass + (item.processed && !isEmptyCAD ? ' feed-item-processed' : '');
     if (item.type === 'cad') {
       el.onclick = toggleDrawer;
       el.style.cursor = 'pointer';
@@ -1632,6 +1635,17 @@ function renderBucket() {
       </div>
       <div class="feed-item-body">${getBucketBody(item)}</div>`;
     bucket.appendChild(el);
+  });
+  // Assign bubble-tail only to the last card of each consecutive same-side group
+  const feedEls = Array.from(bucket.querySelectorAll('.feed-item'));
+  feedEls.forEach(el => el.classList.remove('bubble-tail'));
+  feedEls.forEach((el, i) => {
+    const next = feedEls[i + 1];
+    const isSystem = el.classList.contains('feed-bubble-system');
+    const nextIsSystem = next && next.classList.contains('feed-bubble-system');
+    const nextIsUser = next && next.classList.contains('feed-bubble-user');
+    if (isSystem && !nextIsSystem) el.classList.add('bubble-tail');
+    if (!isSystem && !nextIsUser) el.classList.add('bubble-tail');
   });
 }
 
@@ -4343,8 +4357,8 @@ function addAIResultCard(auditLog, callType) {
     populated, updated, skipped,
     callType: callType || '(not set)'
   };
-  bucketItems.unshift(item);
+  bucketItems.push(item);
   renderBucket();
   const bucket = document.getElementById('bucket');
-  if (bucket) bucket.scrollTop = 0;
+  if (bucket) bucket.scrollTop = bucket.scrollHeight;
 }

@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.128 -->
+<!-- Version: v10.0.129 -->
 <script>
-const APP_VERSION = 'v10.0.128';
+const APP_VERSION = 'v10.0.129';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -4589,14 +4589,110 @@ self.addEventListener('fetch', e => {
 .feed-item-processed .feed-item-type { color: var(--success); opacity: 1; }
 
 .feed-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-bottom: 10px;
-  overflow: hidden;
+  border-radius: 18px;
+  margin-bottom: 18px;
+  overflow: visible;
   animation: fadeInFeed 0.2s ease;
+  max-width: 75%;
+  clear: both;
+  position: relative;
 }
-@keyframes fadeInFeed { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInFeed { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* System bubbles (CAD, AI result) — left aligned, dark */
+.feed-bubble-system {
+  float: left;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  color: #e0e0e0;
+  border-radius: 18px 18px 18px 4px;
+}
+.feed-bubble-system .feed-item-header {
+  border-bottom-color: #2a2a2a;
+}
+.feed-bubble-system .feed-item-type,
+.feed-bubble-system .feed-item-icon,
+.feed-bubble-system .feed-item-time {
+  color: #666;
+}
+.feed-bubble-system .cad-card-label,
+.feed-bubble-system .cad-summary-label,
+.feed-bubble-system .cad-card-empty {
+  color: #555;
+}
+.feed-bubble-system .cad-card-value,
+.feed-bubble-system .cad-tap-hint {
+  color: #bbb;
+}
+
+/* User bubbles (note, photo, pdf, voice) — right aligned, blue */
+.feed-bubble-user {
+  float: right;
+  background: #1a4a8a;
+  border: 1px solid #1e5299;
+  color: #e8f0fe;
+  border-radius: 18px 18px 4px 18px;
+}
+.feed-bubble-user .feed-item-header {
+  border-bottom-color: #1e5299;
+}
+.feed-bubble-user .feed-item-type,
+.feed-bubble-user .feed-item-icon,
+.feed-bubble-user .feed-item-time {
+  color: #7aaee8;
+}
+.feed-bubble-user .feed-note-text {
+  color: #e8f0fe;
+}
+.feed-bubble-user .feed-pdf-name {
+  color: #e8f0fe;
+}
+.feed-bubble-user .feed-pdf-hint {
+  color: #90c4f8;
+}
+.feed-bubble-user .feed-photo-caption {
+  color: #7aaee8;
+}
+.feed-bubble-user .feed-item-delete {
+  color: #7aaee8;
+}
+.feed-bubble-user .feed-item-delete:hover {
+  color: #ff7070;
+}
+
+/* Clearfix so bucket scrolls past floats */
+.bucket::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+/* ── Bubble tails — only on .bubble-tail cards ── */
+.feed-bubble-system.bubble-tail::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 16px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 11px solid #111;
+  filter: drop-shadow(0 1px 0 #2a2a2a);
+}
+
+.feed-bubble-user.bubble-tail::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  right: 16px;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 11px solid #1a4a8a;
+  filter: drop-shadow(0 1px 0 #1e5299);
+}
 .feed-item-header {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 12px;
@@ -7802,10 +7898,13 @@ function renderBucket() {
   if (!bucket) return;
   empty.style.display = bucketItems.length ? 'none' : 'flex';
   bucket.querySelectorAll('.feed-item').forEach(el => el.remove());
+  const SYSTEM_TYPES = ['cad', 'ai_result'];
   bucketItems.forEach(item => {
     const el = document.createElement('div');
+    const isSystem = SYSTEM_TYPES.includes(item.type);
     const isEmptyCAD = item.type === 'cad' && !(item.data && (item.data.onScene || item.data.depart || item.data.hospital || item.data.rts || item.data.dest));
-    el.className = 'feed-item' + (item.processed && !isEmptyCAD ? ' feed-item-processed' : '');
+    const bubbleClass = isSystem ? 'feed-bubble-system' : 'feed-bubble-user';
+    el.className = 'feed-item ' + bubbleClass + (item.processed && !isEmptyCAD ? ' feed-item-processed' : '');
     if (item.type === 'cad') {
       el.onclick = toggleDrawer;
       el.style.cursor = 'pointer';
@@ -7822,6 +7921,17 @@ function renderBucket() {
       </div>
       <div class="feed-item-body">${getBucketBody(item)}</div>`;
     bucket.appendChild(el);
+  });
+  // Assign bubble-tail only to the last card of each consecutive same-side group
+  const feedEls = Array.from(bucket.querySelectorAll('.feed-item'));
+  feedEls.forEach(el => el.classList.remove('bubble-tail'));
+  feedEls.forEach((el, i) => {
+    const next = feedEls[i + 1];
+    const isSystem = el.classList.contains('feed-bubble-system');
+    const nextIsSystem = next && next.classList.contains('feed-bubble-system');
+    const nextIsUser = next && next.classList.contains('feed-bubble-user');
+    if (isSystem && !nextIsSystem) el.classList.add('bubble-tail');
+    if (!isSystem && !nextIsUser) el.classList.add('bubble-tail');
   });
 }
 
@@ -10533,10 +10643,10 @@ function addAIResultCard(auditLog, callType) {
     populated, updated, skipped,
     callType: callType || '(not set)'
   };
-  bucketItems.unshift(item);
+  bucketItems.push(item);
   renderBucket();
   const bucket = document.getElementById('bucket');
-  if (bucket) bucket.scrollTop = 0;
+  if (bucket) bucket.scrollTop = bucket.scrollHeight;
 }
 </script>
 <script>
