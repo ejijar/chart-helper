@@ -4519,6 +4519,7 @@
   overflow: visible;
   animation: fadeInFeed 0.2s ease;
   max-width: 75%;
+  min-width: 55%;
   clear: both;
   position: relative;
 }
@@ -4596,27 +4597,27 @@
 .feed-bubble-system.bubble-tail::after {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -11px;
   left: 16px;
   width: 0;
   height: 0;
-  border-left: 10px solid transparent;
+  border-left: 11px solid #111;
   border-right: 4px solid transparent;
-  border-top: 11px solid #111;
-  filter: drop-shadow(0 1px 0 #2a2a2a);
+  border-bottom: 11px solid transparent;
+  border-top: 0;
 }
 
 .feed-bubble-user.bubble-tail::after {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -11px;
   right: 16px;
   width: 0;
   height: 0;
+  border-right: 11px solid #1a4a8a;
   border-left: 4px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 11px solid #1a4a8a;
-  filter: drop-shadow(0 1px 0 #1e5299);
+  border-bottom: 11px solid transparent;
+  border-top: 0;
 }
 .feed-item-header {
   display: flex; align-items: center; gap: 8px;

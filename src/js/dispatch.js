@@ -1566,11 +1566,11 @@ function addBucketItem(item) {
   item.id = Date.now();
   item.timestamp = bucketNow();
   item.stage = inferStage(item.timestamp);
-  bucketItems.unshift(item);
+  bucketItems.push(item);
   renderBucket();
   updateAIBtn();
   const bucket = document.getElementById('bucket');
-  if (bucket) bucket.scrollTop = 0;
+  if (bucket) bucket.scrollTop = bucket.scrollHeight;
   return item;
 }
 
