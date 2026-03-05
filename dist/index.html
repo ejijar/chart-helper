@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.136 -->
+<!-- Version: v10.0.137 -->
 <script>
-const APP_VERSION = 'v10.0.136';
+const APP_VERSION = 'v10.0.137';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -4563,12 +4563,9 @@ self.addEventListener('fetch', e => {
   overflow-y: auto;
   padding: 16px;
   padding-bottom: 180px;
-}
-.bucket .feed-bubble-row:first-child {
-  margin-top: 0;
-}
-.bucket .feed-bubble-row + .feed-bubble-row {
-  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 .bucket-empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -4595,14 +4592,15 @@ self.addEventListener('fetch', e => {
 
 /* Wrapper row holds the bubble + the badge outside it */
 .feed-bubble-row {
-  clear: both;
-  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
 }
 .feed-bubble-row .feed-item {
-  margin-bottom: 4px;
+  margin-bottom: 0;
 }
 .feed-bubble-row.processed {
-  margin-bottom: 22px;
+  margin-bottom: 8px;
 }
 
 /* Delivered-style badge outside the bubble, below it */
@@ -4632,14 +4630,13 @@ self.addEventListener('fetch', e => {
   animation: fadeInFeed 0.2s ease;
   max-width: 75%;
   min-width: 55%;
-  clear: both;
   position: relative;
 }
 @keyframes fadeInFeed { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 /* System bubbles (CAD, AI result) — left aligned, dark */
 .feed-bubble-system {
-  float: left;
+  align-self: flex-start;
   background: var(--surface2);
   border: 1px solid var(--border);
   color: var(--text);
@@ -4665,7 +4662,7 @@ self.addEventListener('fetch', e => {
 
 /* User bubbles (note, photo, pdf, voice) — right aligned, blue */
 .feed-bubble-user {
-  float: right;
+  align-self: flex-end;
   background: #0b84fe;
   border: 1px solid #0a75e8;
   color: #ffffff;
