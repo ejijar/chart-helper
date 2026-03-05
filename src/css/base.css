@@ -4616,29 +4616,36 @@
 .feed-bubble-system.bubble-tail::after {
   content: '';
   position: absolute;
-  bottom: 10px;
-  left: -6px;
-  width: 12px;
-  height: 12px;
+  bottom: -7px;
+  left: 10px;
+  width: 14px;
+  height: 14px;
   background: var(--surface2);
-  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  transform: rotate(45deg);
-  border-radius: 0 0 0 3px;
+  transform: rotate(45deg) skew(10deg, 10deg);
+  border-radius: 0 0 4px 0;
+  clip-path: polygon(0% 0%, 100% 100%, 100% 0%);
+}
+.light-mode .feed-bubble-system.bubble-tail::after {
+  background: #c7c7cc;
+  border-right-color: #b0b0b6;
+  border-bottom-color: #b0b0b6;
 }
 
 .feed-bubble-user.bubble-tail::after {
   content: '';
   position: absolute;
-  bottom: 10px;
-  right: -6px;
-  width: 12px;
-  height: 12px;
+  bottom: -7px;
+  right: 10px;
+  width: 14px;
+  height: 14px;
   background: #0b84fe;
-  border-right: 1px solid #0a75e8;
+  border-left: 1px solid #0a75e8;
   border-bottom: 1px solid #0a75e8;
-  transform: rotate(-45deg);
-  border-radius: 0 3px 0 0;
+  transform: rotate(-45deg) skew(-10deg, -10deg);
+  border-radius: 0 0 0 4px;
+  clip-path: polygon(0% 0%, 0% 100%, 100% 0%);
 }
 .feed-item-header {
   display: flex; align-items: center; gap: 8px;
