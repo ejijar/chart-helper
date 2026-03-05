@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.131 -->
+<!-- Version: v10.0.132 -->
 <script>
-const APP_VERSION = 'v10.0.131';
+const APP_VERSION = 'v10.0.132';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -4629,42 +4629,36 @@ self.addEventListener('fetch', e => {
 /* User bubbles (note, photo, pdf, voice) — right aligned, blue */
 .feed-bubble-user {
   float: right;
-  background: #1a4a8a;
-  border: 1px solid #1e5299;
-  color: #e8f0fe;
+  background: #0b84fe;
+  border: 1px solid #0a75e8;
+  color: #ffffff;
   border-radius: 18px 18px 4px 18px;
 }
 .feed-bubble-user .feed-item-header {
-  border-bottom-color: #1e5299;
+  border-bottom-color: #0a75e8;
 }
 .feed-bubble-user .feed-item-type,
 .feed-bubble-user .feed-item-icon,
 .feed-bubble-user .feed-item-time {
-  color: #7aaee8;
+  color: rgba(255,255,255,0.65);
 }
 .feed-bubble-user .feed-note-text {
-  color: #e8f0fe;
+  color: #ffffff;
 }
 .feed-bubble-user .feed-pdf-name {
-  color: #e8f0fe;
+  color: #ffffff;
 }
 .feed-bubble-user .feed-pdf-hint {
-  color: #90c4f8;
+  color: rgba(255,255,255,0.75);
 }
 .feed-bubble-user .feed-photo-caption {
-  color: #7aaee8;
+  color: rgba(255,255,255,0.65);
 }
 .feed-bubble-user .feed-item-delete {
-  color: #7aaee8;
+  color: rgba(255,255,255,0.65);
 }
 .feed-bubble-user .feed-item-delete:hover {
   color: #ff7070;
-}
-/* Light mode: brighter blue for user bubbles */
-.light-mode .feed-bubble-user,
-@media (prefers-color-scheme: light) { .feed-bubble-user } {
-  background: #1d6ae5;
-  border-color: #1a5dc7;
 }
 
 /* Clearfix so bucket scrolls past floats */
@@ -4674,33 +4668,52 @@ self.addEventListener('fetch', e => {
   clear: both;
 }
 
+/* Light mode system bubble — darker gray so it reads clearly */
+.light-mode .feed-bubble-system {
+  background: #c7c7cc;
+  border-color: #b0b0b6;
+  color: #000000;
+}
+.light-mode .feed-bubble-system .feed-item-header { border-bottom-color: #b0b0b6; }
+.light-mode .feed-bubble-system .feed-item-type,
+.light-mode .feed-bubble-system .feed-item-icon,
+.light-mode .feed-bubble-system .feed-item-time { color: rgba(0,0,0,0.45); }
+.light-mode .feed-bubble-system .cad-card-label,
+.light-mode .feed-bubble-system .cad-summary-label { color: rgba(0,0,0,0.4); }
+.light-mode .feed-bubble-system .cad-card-value { color: #000000; }
+.light-mode .feed-bubble-system.bubble-tail::after {
+  background: #c7c7cc;
+  border-left-color: #b0b0b6;
+  border-bottom-color: #b0b0b6;
+}
+
 /* ── Bubble tails — only on .bubble-tail cards ── */
 .feed-bubble-system.bubble-tail::after {
   content: '';
   position: absolute;
-  bottom: -6px;
-  left: 18px;
+  bottom: 10px;
+  left: -6px;
   width: 12px;
   height: 12px;
   background: var(--surface2);
-  border-right: 1px solid var(--border);
+  border-left: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   transform: rotate(45deg);
-  border-radius: 0 0 3px 0;
+  border-radius: 0 0 0 3px;
 }
 
 .feed-bubble-user.bubble-tail::after {
   content: '';
   position: absolute;
-  bottom: -6px;
-  right: 18px;
+  bottom: 10px;
+  right: -6px;
   width: 12px;
   height: 12px;
-  background: #1a4a8a;
-  border-right: 1px solid #1e5299;
-  border-bottom: 1px solid #1e5299;
-  transform: rotate(45deg);
-  border-radius: 0 0 3px 0;
+  background: #0b84fe;
+  border-right: 1px solid #0a75e8;
+  border-bottom: 1px solid #0a75e8;
+  transform: rotate(-45deg);
+  border-radius: 0 3px 0 0;
 }
 .feed-item-header {
   display: flex; align-items: center; gap: 8px;
