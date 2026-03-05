@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.135 -->
+<!-- Version: v10.0.136 -->
 <script>
-const APP_VERSION = 'v10.0.135';
+const APP_VERSION = 'v10.0.136';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -4564,6 +4564,12 @@ self.addEventListener('fetch', e => {
   padding: 16px;
   padding-bottom: 180px;
 }
+.bucket .feed-bubble-row:first-child {
+  margin-top: 0;
+}
+.bucket .feed-bubble-row + .feed-bubble-row {
+  margin-top: 4px;
+}
 .bucket-empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   min-height: 260px; gap: 12px; color: var(--text-dim);
@@ -4590,10 +4596,13 @@ self.addEventListener('fetch', e => {
 /* Wrapper row holds the bubble + the badge outside it */
 .feed-bubble-row {
   clear: both;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 .feed-bubble-row .feed-item {
   margin-bottom: 4px;
+}
+.feed-bubble-row.processed {
+  margin-bottom: 22px;
 }
 
 /* Delivered-style badge outside the bubble, below it */
@@ -4610,6 +4619,7 @@ self.addEventListener('fetch', e => {
 }
 .feed-bubble-row.user-row .feed-processed-badge {
   text-align: right;
+  padding-right: 32px;
 }
 .feed-bubble-row.system-row .feed-processed-badge {
   text-align: left;
