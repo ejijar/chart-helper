@@ -1611,14 +1611,22 @@ function renderBucket() {
   const empty = document.getElementById('bucketEmpty');
   if (!bucket) return;
   empty.style.display = bucketItems.length ? 'none' : 'flex';
-  bucket.querySelectorAll('.feed-item').forEach(el => el.remove());
+  bucket.querySelectorAll('.feed-bubble-row, .feed-item').forEach(el => el.remove());
   const SYSTEM_TYPES = ['cad', 'ai_result'];
   bucketItems.forEach(item => {
-    const el = document.createElement('div');
     const isSystem = SYSTEM_TYPES.includes(item.type);
     const isEmptyCAD = item.type === 'cad' && !(item.data && (item.data.onScene || item.data.depart || item.data.hospital || item.data.rts || item.data.dest));
     const bubbleClass = isSystem ? 'feed-bubble-system' : 'feed-bubble-user';
-    el.className = 'feed-item ' + bubbleClass + (item.processed && !isEmptyCAD ? ' feed-item-processed' : '');
+    const isProcessed = item.processed && !isEmptyCAD;
+
+    // Wrapper row — holds bubble + badge outside it
+    const row = document.createElement('div');
+    row.className = 'feed-bubble-row' +
+      (isSystem ? ' system-row' : ' user-row') +
+      (isProcessed ? ' processed' : '');
+
+    const el = document.createElement('div');
+    el.className = 'feed-item ' + bubbleClass;
     if (item.type === 'cad') {
       el.onclick = toggleDrawer;
       el.style.cursor = 'pointer';
@@ -1633,9 +1641,15 @@ function renderBucket() {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>` : ''}
       </div>
-      <div class="feed-item-body">${getBucketBody(item)}</div>
-      <div class="feed-processed-badge">✓ Processed</div>`;
-    bucket.appendChild(el);
+      <div class="feed-item-body">${getBucketBody(item)}</div>`;
+
+    const badge = document.createElement('div');
+    badge.className = 'feed-processed-badge';
+    badge.textContent = '✓ Processed';
+
+    row.appendChild(el);
+    row.appendChild(badge);
+    bucket.appendChild(row);
   });
   // Assign bubble-tail only to the last card of each consecutive same-side group
   const feedEls = Array.from(bucket.querySelectorAll('.feed-item'));
@@ -1647,6 +1661,10 @@ function renderBucket() {
     const nextIsUser = next && next.classList.contains('feed-bubble-user');
     if (isSystem && !nextIsSystem) el.classList.add('bubble-tail');
     if (!isSystem && !nextIsUser) el.classList.add('bubble-tail');
+  });
+  // Also clear old feed-item direct children (now wrapped in rows)
+  bucket.querySelectorAll('.feed-bubble-row .feed-item').forEach(el => {
+    el.style.marginBottom = '0';
   });
 }
 

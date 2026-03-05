@@ -4512,30 +4512,37 @@
 .feed-item-processed .feed-item-body { opacity: 1; }
 .feed-item-processed .feed-item-type { opacity: 1; }
 
-/* Delivered-style badge sits below the bubble */
-.feed-item-processed .feed-processed-badge {
-  display: block;
+/* Wrapper row holds the bubble + the badge outside it */
+.feed-bubble-row {
+  clear: both;
+  margin-bottom: 18px;
 }
+.feed-bubble-row .feed-item {
+  margin-bottom: 4px;
+}
+
+/* Delivered-style badge outside the bubble, below it */
 .feed-processed-badge {
   display: none;
   font-family: var(--mono);
   font-size: 10px;
   color: var(--success);
-  margin-top: 4px;
-  padding: 0 4px;
+  clear: both;
+  padding: 0 6px 2px;
 }
-.feed-bubble-user .feed-processed-badge {
+.feed-bubble-row.processed .feed-processed-badge {
+  display: block;
+}
+.feed-bubble-row.user-row .feed-processed-badge {
   text-align: right;
-  padding-right: 6px;
 }
-.feed-bubble-system .feed-processed-badge {
+.feed-bubble-row.system-row .feed-processed-badge {
   text-align: left;
-  padding-left: 6px;
 }
 
 .feed-item {
   border-radius: 18px;
-  margin-bottom: 18px;
+  margin-bottom: 0;
   overflow: visible;
   animation: fadeInFeed 0.2s ease;
   max-width: 75%;
@@ -4700,6 +4707,29 @@
   margin-top: 8px; font-family: var(--sans); font-size: 13px;
   color: var(--text-muted); font-style: italic; line-height: 1.5;
   border-left: 2px solid var(--border); padding-left: 8px;
+}
+.feed-bubble-user .feed-transcript {
+  color: rgba(255,255,255,0.85);
+  border-left-color: rgba(255,255,255,0.3);
+}
+.feed-bubble-user .feed-voice-engine {
+  color: rgba(255,255,255,0.5);
+}
+.feed-bubble-user .play-btn {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.25);
+  color: #fff;
+}
+.feed-bubble-user .voice-waveform-bar {
+  background: rgba(255,255,255,0.15);
+}
+.feed-bubble-user .waveform-tick {
+  background: rgba(255,255,255,0.7);
+}
+.feed-bubble-user .stage-badge {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7);
 }
 .feed-voice-transcribed { display: flex; flex-direction: column; gap: 6px; }
 .feed-voice-header {

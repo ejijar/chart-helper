@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.134 -->
+<!-- Version: v10.0.135 -->
 <script>
-const APP_VERSION = 'v10.0.134';
+const APP_VERSION = 'v10.0.135';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -4587,30 +4587,37 @@ self.addEventListener('fetch', e => {
 .feed-item-processed .feed-item-body { opacity: 1; }
 .feed-item-processed .feed-item-type { opacity: 1; }
 
-/* Delivered-style badge sits below the bubble */
-.feed-item-processed .feed-processed-badge {
-  display: block;
+/* Wrapper row holds the bubble + the badge outside it */
+.feed-bubble-row {
+  clear: both;
+  margin-bottom: 18px;
 }
+.feed-bubble-row .feed-item {
+  margin-bottom: 4px;
+}
+
+/* Delivered-style badge outside the bubble, below it */
 .feed-processed-badge {
   display: none;
   font-family: var(--mono);
   font-size: 10px;
   color: var(--success);
-  margin-top: 4px;
-  padding: 0 4px;
+  clear: both;
+  padding: 0 6px 2px;
 }
-.feed-bubble-user .feed-processed-badge {
+.feed-bubble-row.processed .feed-processed-badge {
+  display: block;
+}
+.feed-bubble-row.user-row .feed-processed-badge {
   text-align: right;
-  padding-right: 6px;
 }
-.feed-bubble-system .feed-processed-badge {
+.feed-bubble-row.system-row .feed-processed-badge {
   text-align: left;
-  padding-left: 6px;
 }
 
 .feed-item {
   border-radius: 18px;
-  margin-bottom: 18px;
+  margin-bottom: 0;
   overflow: visible;
   animation: fadeInFeed 0.2s ease;
   max-width: 75%;
@@ -4775,6 +4782,29 @@ self.addEventListener('fetch', e => {
   margin-top: 8px; font-family: var(--sans); font-size: 13px;
   color: var(--text-muted); font-style: italic; line-height: 1.5;
   border-left: 2px solid var(--border); padding-left: 8px;
+}
+.feed-bubble-user .feed-transcript {
+  color: rgba(255,255,255,0.85);
+  border-left-color: rgba(255,255,255,0.3);
+}
+.feed-bubble-user .feed-voice-engine {
+  color: rgba(255,255,255,0.5);
+}
+.feed-bubble-user .play-btn {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.25);
+  color: #fff;
+}
+.feed-bubble-user .voice-waveform-bar {
+  background: rgba(255,255,255,0.15);
+}
+.feed-bubble-user .waveform-tick {
+  background: rgba(255,255,255,0.7);
+}
+.feed-bubble-user .stage-badge {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7);
 }
 .feed-voice-transcribed { display: flex; flex-direction: column; gap: 6px; }
 .feed-voice-header {
@@ -7946,14 +7976,22 @@ function renderBucket() {
   const empty = document.getElementById('bucketEmpty');
   if (!bucket) return;
   empty.style.display = bucketItems.length ? 'none' : 'flex';
-  bucket.querySelectorAll('.feed-item').forEach(el => el.remove());
+  bucket.querySelectorAll('.feed-bubble-row, .feed-item').forEach(el => el.remove());
   const SYSTEM_TYPES = ['cad', 'ai_result'];
   bucketItems.forEach(item => {
-    const el = document.createElement('div');
     const isSystem = SYSTEM_TYPES.includes(item.type);
     const isEmptyCAD = item.type === 'cad' && !(item.data && (item.data.onScene || item.data.depart || item.data.hospital || item.data.rts || item.data.dest));
     const bubbleClass = isSystem ? 'feed-bubble-system' : 'feed-bubble-user';
-    el.className = 'feed-item ' + bubbleClass + (item.processed && !isEmptyCAD ? ' feed-item-processed' : '');
+    const isProcessed = item.processed && !isEmptyCAD;
+
+    // Wrapper row — holds bubble + badge outside it
+    const row = document.createElement('div');
+    row.className = 'feed-bubble-row' +
+      (isSystem ? ' system-row' : ' user-row') +
+      (isProcessed ? ' processed' : '');
+
+    const el = document.createElement('div');
+    el.className = 'feed-item ' + bubbleClass;
     if (item.type === 'cad') {
       el.onclick = toggleDrawer;
       el.style.cursor = 'pointer';
@@ -7968,9 +8006,15 @@ function renderBucket() {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>` : ''}
       </div>
-      <div class="feed-item-body">${getBucketBody(item)}</div>
-      <div class="feed-processed-badge">✓ Processed</div>`;
-    bucket.appendChild(el);
+      <div class="feed-item-body">${getBucketBody(item)}</div>`;
+
+    const badge = document.createElement('div');
+    badge.className = 'feed-processed-badge';
+    badge.textContent = '✓ Processed';
+
+    row.appendChild(el);
+    row.appendChild(badge);
+    bucket.appendChild(row);
   });
   // Assign bubble-tail only to the last card of each consecutive same-side group
   const feedEls = Array.from(bucket.querySelectorAll('.feed-item'));
@@ -7982,6 +8026,10 @@ function renderBucket() {
     const nextIsUser = next && next.classList.contains('feed-bubble-user');
     if (isSystem && !nextIsSystem) el.classList.add('bubble-tail');
     if (!isSystem && !nextIsUser) el.classList.add('bubble-tail');
+  });
+  // Also clear old feed-item direct children (now wrapped in rows)
+  bucket.querySelectorAll('.feed-bubble-row .feed-item').forEach(el => {
+    el.style.marginBottom = '0';
   });
 }
 
