@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.141 -->
+<!-- Version: v10.0.142 -->
 <script>
-const APP_VERSION = 'v10.0.141';
+const APP_VERSION = 'v10.0.142';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -10346,7 +10346,7 @@ const DISPATCH_BRIEFINGS = {
 
 async function processWithAI() {
   if (bucketItems.length === 0) { alert('Add some items to the record first.'); return; }
-  if (!hasAnthropicKey()) { alert('No API key set — open settings and enter your Anthropic API key.'); return; }
+  if (!hasAnthropicKey()) { showAlert('warn', 'API Key Needed', 'Open ⚙ Crew settings and enter your Anthropic API key.'); return; }
   if (!isOnline()) { alert("You're offline — connect to the internet to process with AI."); return; }
 
   const btn = document.getElementById('aiProcessBtn');
@@ -14832,8 +14832,8 @@ function closeAccountOutside(e) {
 function saveAccount() {
   accountSettings.email = document.getElementById('a_email').value.trim();
   try { localStorage.setItem('ems_account', JSON.stringify(accountSettings)); } catch(e) {}
-  closeAccount();
   flashSuccess('saveAccountBtn', 'Save'); flashSuccess('saveAccountBtnModal', 'Save');
+  setTimeout(() => closeAccount(), 1200);
 }
 
 // ======== APP SETTINGS ========
@@ -14862,8 +14862,8 @@ function saveAppSettings() {
   settings.voiceengine = document.getElementById('as_voiceengine').value;
   // themeMode is already updated live via setThemeMode()
   try { localStorage.setItem('ems_crew_settings', JSON.stringify(settings)); } catch(e) {}
-  closeAppSettings();
   flashSuccess('saveAppSettingsBtn', 'Save'); flashSuccess('saveAppSettingsBtnModal', 'Save');
+  setTimeout(() => closeAppSettings(), 1200);
 }
 
 // ======== AGE CALCULATOR ========

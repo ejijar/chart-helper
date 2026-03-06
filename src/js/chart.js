@@ -2673,8 +2673,8 @@ function closeAccountOutside(e) {
 function saveAccount() {
   accountSettings.email = document.getElementById('a_email').value.trim();
   try { localStorage.setItem('ems_account', JSON.stringify(accountSettings)); } catch(e) {}
-  closeAccount();
   flashSuccess('saveAccountBtn', 'Save'); flashSuccess('saveAccountBtnModal', 'Save');
+  setTimeout(() => closeAccount(), 1200);
 }
 
 // ======== APP SETTINGS ========
@@ -2703,8 +2703,8 @@ function saveAppSettings() {
   settings.voiceengine = document.getElementById('as_voiceengine').value;
   // themeMode is already updated live via setThemeMode()
   try { localStorage.setItem('ems_crew_settings', JSON.stringify(settings)); } catch(e) {}
-  closeAppSettings();
   flashSuccess('saveAppSettingsBtn', 'Save'); flashSuccess('saveAppSettingsBtnModal', 'Save');
+  setTimeout(() => closeAppSettings(), 1200);
 }
 
 // ======== AGE CALCULATOR ========

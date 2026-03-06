@@ -3902,7 +3902,7 @@ const DISPATCH_BRIEFINGS = {
 
 async function processWithAI() {
   if (bucketItems.length === 0) { alert('Add some items to the record first.'); return; }
-  if (!hasAnthropicKey()) { alert('No API key set — open settings and enter your Anthropic API key.'); return; }
+  if (!hasAnthropicKey()) { showAlert('warn', 'API Key Needed', 'Open ⚙ Crew settings and enter your Anthropic API key.'); return; }
   if (!isOnline()) { alert("You're offline — connect to the internet to process with AI."); return; }
 
   const btn = document.getElementById('aiProcessBtn');
