@@ -13088,7 +13088,7 @@ function updateGCSTotal() {
 
 function confirmGCS() {
   const e = gcsScores.eye, v = gcsScores.verbal, m = gcsScores.motor;
-  if (!e || !v || !m) { return; // GCS incomplete — selects are visible, no notification needed }
+  if (!e || !v || !m) { return; } // GCS incomplete
   const total = e + v + m;
   const label = `${total}`;
   const detail = `E${e}V${v}M${m}`;
