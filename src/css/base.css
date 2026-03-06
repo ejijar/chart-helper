@@ -4852,10 +4852,8 @@
 }
 .post-call-btn:hover, .post-call-btn.active { border-color: var(--accent); color: var(--accent); }
 
-}
 
-
-  /* ── Alert Modal ── */
+/* ── Alert Modal ── */
   #alertModal {
     display: none;
     position: fixed; top:0; left:0; right:0; bottom:0;
@@ -4925,3 +4923,5 @@
     border: 1px solid rgba(var(--accent-rgb, 0,122,255),0.25);
     color: var(--accent);
   }
+
+}
