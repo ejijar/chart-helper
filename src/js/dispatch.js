@@ -392,7 +392,7 @@ function viewProtocol(protocolId) {
     }
     
     if (!protocol) {
-      showToast('error', 'Protocol Not Found', 'Protocol ' + protocolId + ' not found');
+      console.warn('[EMS] Protocol not found:', protocolId);
       return;
     }
     
@@ -590,24 +590,54 @@ window.onerror = function(msg, src, line, col, err) {
   return false;
 };
 
-// ======== TOAST NOTIFICATIONS ========
+// ======== ALERT MODAL (replaces toasts) ========
+function showAlert(type, title, msg) {
+  // type: 'error' | 'warn' | 'info'
+  const modal = document.getElementById('alertModal');
+  const titleEl = document.getElementById('alertTitle');
+  const msgEl = document.getElementById('alertMsg');
+  titleEl.textContent = title;
+  titleEl.className = 'confirm-title' + (type === 'warn' ? ' alert-warn' : '');
+  msgEl.textContent = msg || '';
+  modal.classList.add('show');
+  const okBtn = document.getElementById('alertOk');
+  okBtn.onclick = () => modal.classList.remove('show');
+}
+function showInlineBanner(containerId, type, msg) {
+  // type: 'error' | 'warn' | 'info'
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  // Remove existing banner in this container
+  const existing = container.querySelector('.inline-banner');
+  if (existing) existing.remove();
+  if (!msg) return;
+  const icons = { error: '✕', warn: '⚠', info: 'ℹ' };
+  const div = document.createElement('div');
+  div.className = `inline-banner banner-${type}`;
+  div.innerHTML = `<span style="flex-shrink:0;font-size:14px;">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  container.appendChild(div);
+}
+function flashSuccess(btnId, originalLabel, duration) {
+  duration = duration || 2000;
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  const orig = originalLabel || btn.textContent;
+  btn.textContent = '✓ Done';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }, duration);
+}
+// Legacy stub — should be unused after v10.0.138
 function showToast(type, title, msg, duration) {
-  // type: 'success' | 'error' | 'warn' | 'info'
-  duration = duration || 4000;
-  const icons = { success: '✅', error: '❌', warn: '', info: 'ℹ️' };
-  const container = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = `toast toast-${type}`;
-  t.innerHTML = `<div class="toast-icon">${icons[type]||'ℹ️'}</div><div class="toast-body"><div class="toast-title">${title}</div>${msg ? `<div class="toast-msg">${msg}</div>` : ''}</div>`;
-  t.onclick = () => dismissToast(t);
-  container.appendChild(t);
-  const timer = setTimeout(() => dismissToast(t), duration);
-  t._timer = timer;
+  if (type === 'error' || type === 'warn') {
+    showAlert(type, title, msg);
+  }
+  // success/info silently dropped — handled by flashSuccess or inline UI
 }
 function dismissToast(t) {
-  clearTimeout(t._timer);
-  t.classList.add('toast-out');
-  setTimeout(() => t.remove(), 260);
+  if (t && t.remove) t.remove();
 }
 
 // ======== CONFIRM MODAL ========
@@ -788,14 +818,14 @@ async function processExtractionQueue() {
   if (queueProcessing) return;
   if (!isOnline()) { updateQueueBanner(); return; }
   if (!hasAnthropicKey()) {
-    showToast('warn', 'API Key Needed', 'Add your Anthropic API key in ⚙ Crew settings to process queued extractions.');
+    showAlert('warn', 'API Key Needed', 'Add your Anthropic API key in ⚙ Crew settings to process queued extractions.');
     return;
   }
   const pending = pendingQueueItems();
   if (pending.length === 0) { updateQueueBanner(); return; }
 
   queueProcessing = true;
-  showToast('info', 'Processing Queue', `Running ${pending.length} pending extraction${pending.length !== 1 ? 's' : ''}…`);
+  // Processing started — no notification needed
 
   for (const item of pending) {
     item.status = 'processing';
@@ -818,14 +848,14 @@ async function processExtractionQueue() {
       item.status = 'error';
       item.error = err.message;
       saveQueue();
-      showToast('error', 'Extraction Failed', `${item.section}: ${err.message}`);
+      showAlert('error', 'Extraction Failed', `${item.section}: ${err.message}`);
     }
   }
 
   queueProcessing = false;
   const stillPending = pendingQueueItems();
   if (stillPending.length === 0) {
-    showToast('success', 'All Extractions Complete', 'All queued transcripts have been extracted into fields.');
+    // All extractions complete — bucket UI reflects this
     // Clean up done items older than 24h
     extractionQueue = extractionQueue.filter(i => i.status !== 'done' || (Date.now() - i.timestamp) < 86400000);
     saveQueue();
@@ -1384,7 +1414,7 @@ async function toggleBucketVoice() {
             finalizeLiveBucketItem(liveId);
           } catch(err) {
             finalizeLiveBucketItem(liveId);
-            showToast('error', 'Transcription Failed', err.message);
+            showAlert('error', 'Transcription Failed', err.message);
           }
         };
         mediaRecorder.start(100);
@@ -1394,12 +1424,12 @@ async function toggleBucketVoice() {
         if (label) label.style.display = 'none';
         bucketItems = bucketItems.filter(i => i.id !== liveId);
         renderBucket();
-        showToast('error', 'Microphone Error', e.message);
+        showAlert('error', 'Microphone Error', e.message);
       }
     } else {
       // WebSpeech path — live transcription card updates in real time
       if (!hasWebSpeech()) {
-        showToast('error', 'Not Supported', 'Web Speech API not available on this device.');
+        showAlert('error', 'Not Supported', 'Web Speech API is not available on this device.');
         isCapturing = false;
         btn.classList.remove('recording');
         if (label) label.style.display = 'none';
@@ -4002,7 +4032,7 @@ async function processWithAI() {
 
   } catch(err) {
     progressBar.hide();
-    showToast('error', 'AI Processing Failed', err.message);
+    showAlert('error', 'AI Processing Failed', err.message);
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalHTML;

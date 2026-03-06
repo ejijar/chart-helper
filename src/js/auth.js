@@ -132,7 +132,7 @@ async function loginUser() {
   
   document.getElementById('loginOverlay').style.display = 'none';
   setTimeout(function(){ var activeTab = document.querySelector('.tab.active'); if(activeTab) activeTab.click(); }, 300);
-  showToast('success', `Welcome back, ${username}!`, 'You are now signed in.');
+  // Sign-in success — no notification needed, UI reflects logged-in state
 
   // Check for a recoverable auto-save from the previous session
   setTimeout(() => checkAutoRecover(username, password), 600);
@@ -192,7 +192,7 @@ async function signupUser() {
   
   document.getElementById('loginOverlay').style.display = 'none';
   setTimeout(function(){ var activeTab = document.querySelector('.tab.active'); if(activeTab) activeTab.click(); }, 300);
-  showToast('success', `Welcome, ${username}!`, 'Account created. Your password encrypts all patient data — keep it secure.');
+  // Account created — no toast needed, UI reflects logged-in state
   // New accounts won't have a prior auto-save, but check anyway for safety
   setTimeout(() => checkAutoRecover(username, password), 600);
 }
@@ -364,7 +364,7 @@ function getEncryptionPassword(silent = false) {
   if (!encryptionKey) {
     // Only show warning if not silent and we're not already showing login screen
     if (!silent && document.getElementById('loginOverlay').style.display !== 'flex') {
-      showToast('warn', 'Session Expired', 'Please sign in again.');
+      showAlert('warn', 'Session Expired', 'Please sign in again.');
       showLoginScreen();
     }
     return null;
@@ -525,7 +525,7 @@ function collectChartData() {
 
 function restoreChartData(data) {
   if (!data || data.version !== '1.0') {
-    showToast('error', 'Import Failed', 'Invalid or incompatible chart data.');
+    showAlert('error', 'Import Failed', 'Invalid or incompatible chart data.');
     return false;
   }
   
@@ -884,10 +884,10 @@ async function checkAutoRecover(username, password) {
         try {
           const chartData = await decryptData(slot.data, `${username}:${password}`);
           if (restoreChartData(chartData)) {
-            showToast('success', 'Session Restored', 'Your previous chart has been loaded.');
+            // Chart restored — UI reflects this, no button flash needed
           }
         } catch (err) {
-          showToast('error', 'Restore Failed', 'Could not decrypt the auto-save — it may have been saved with a different password.');
+          showAlert('error', 'Restore Failed', 'Could not decrypt the auto-save. It may have been saved with a different password.');
         }
       }
       // Pressing Cancel simply dismisses; the auto-save slot persists until
@@ -1005,7 +1005,7 @@ async function exportToJSON() {
       const file = new File([blob], filename, { type: 'application/json' });
       try {
         await navigator.share({ files: [file], title: filename });
-        showToast('success', 'Chart Exported', `Saved as ${filename}. You will need your password to import it.`);
+        flashSuccess('saveFileBtn', 'Save to File');
       } catch (shareErr) {
         if (shareErr.name !== 'AbortError') throw shareErr;
         // User dismissed share sheet — no toast
@@ -1017,10 +1017,10 @@ async function exportToJSON() {
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-      showToast('success', 'Chart Exported', `Saved as ${filename}. You will need your password to import it.`);
+      flashSuccess('saveFileBtn', 'Save to File');
     }
   } catch (err) {
-    showToast('error', 'Export Failed', err.message);
+    showAlert('error', 'Export Failed', err.message);
   }
 }
 
@@ -1059,7 +1059,7 @@ async function handleJSONImport(event) {
                 try {
                   const altData = await decryptData(importedData.data, `${altUsername}:${altPassword}`);
                   if (restoreChartData(altData)) {
-                    showToast('success', 'Chart Imported', 'Chart imported with alternate password.');
+                    // Chart restored — UI reflects this, no button flash needed
                     setTimeout(() => {
                       const hidden = [];
                       document.querySelectorAll(
@@ -1077,7 +1077,7 @@ async function handleJSONImport(event) {
                     }, 300);
                   }
                 } catch (e) {
-                  showToast('error', 'Import Failed', 'Incorrect alternate password or corrupted file.');
+                  showAlert('error', 'Import Failed', 'Incorrect alternate password or corrupted file.');
                 }
                 event.target.value = '';
               },
@@ -1091,7 +1091,7 @@ async function handleJSONImport(event) {
         }
         
         if (restoreChartData(chartData)) {
-          showToast('success', 'Chart Imported', 'Chart imported and decrypted successfully.');
+          // Chart restored — UI reflects this, no button flash needed
           // Force-resize all textareas after import — do this from here (not inside
           // restoreChartData) so we can use a longer delay and know the DOM is settled.
           // We un-hide every hidden ancestor so scrollHeight is measurable.
@@ -1117,7 +1117,7 @@ async function handleJSONImport(event) {
         event.target.value = '';
       });
     } catch (err) {
-      showToast('error', 'File Read Error', err.message);
+      showAlert('error', 'File Read Error', err.message);
     }
     
     // Reset file input

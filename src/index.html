@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.137 -->
+<!-- Version: v10.0.138 -->
 <script>
-const APP_VERSION = 'v10.0.137';
+const APP_VERSION = 'v10.0.138';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -121,7 +121,7 @@ self.addEventListener('fetch', e => {
           <div class="menu-desc">Open chart from file</div>
         </div>
       </button>
-      <button class="menu-item" onclick="exportToJSON(); toggleMenu();">
+      <button class="menu-item" id="saveFileBtn" onclick="exportToJSON(); toggleMenu();">
         <span class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v14a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>
         <div>
           <div class="menu-title">Save to File</div>
@@ -146,7 +146,7 @@ self.addEventListener('fetch', e => {
           <input type="email" id="a_email" placeholder="you@example.com" inputmode="email" autocomplete="email">
           <div class="field-hint">Used as the "To:" address when you tap Email Chart to Desktop. Stored locally on this device only.</div>
         </div>
-        <button class="panel-save-btn" onclick="saveAccount()">Save</button>
+        <button class="panel-save-btn" id="saveAccountBtn" onclick="saveAccount()">Save</button>
         <div class="panel-divider"></div>
         <div class="panel-section-label">Session</div>
         <button class="panel-danger-btn" onclick="toggleMenu(); logoutUser();">
@@ -236,7 +236,7 @@ self.addEventListener('fetch', e => {
           </select>
           <div class="field-hint">Auto recommended. Whisper requires OpenAI key.</div>
         </div>
-        <button class="panel-save-btn" onclick="saveAppSettings()">Save</button>
+        <button class="panel-save-btn" id="saveAppSettingsBtn" onclick="saveAppSettings()">Save</button>
       </div>
       <div class="menu-divider"></div>
       <div style="padding: 10px 12px; text-align: center;">
@@ -1277,7 +1277,7 @@ self.addEventListener('fetch', e => {
       </div>
     </button>
 
-    <button class="save-btn" onclick="saveAccount()" style="margin-top:16px">Save</button>
+    <button class="save-btn" id="saveAccountBtnModal" onclick="saveAccount()" style="margin-top:16px">Save</button>
   </div>
 </div>
 
@@ -1328,7 +1328,7 @@ self.addEventListener('fetch', e => {
       </div>
     </div>
 
-    <button class="save-btn" onclick="saveAppSettings()" style="margin-top:16px">Save</button>
+    <button class="save-btn" id="saveAppSettingsBtnModal" onclick="saveAppSettings()" style="margin-top:16px">Save</button>
   </div>
 </div>
 
@@ -1433,6 +1433,18 @@ self.addEventListener('fetch', e => {
     </div>
   </div>
 </div>
+
+<!-- ALERT MODAL -->
+<div id="alertModal">
+  <div class="confirm-box">
+    <div class="confirm-title" id="alertTitle">Alert</div>
+    <div class="confirm-msg" id="alertMsg"></div>
+    <div class="confirm-btns">
+      <button class="btn-primary" id="alertOk" style="background:var(--accent); border-color:var(--accent);">OK</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- PROTOCOLS SIDEBAR -->
 <div class="protocol-overlay" id="protocolOverlay" onclick="toggleProtocolsSidebar()"></div>

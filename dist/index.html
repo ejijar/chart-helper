@@ -13,9 +13,9 @@
 <link rel="manifest" id="pwa-manifest">
 <link rel="apple-touch-icon" id="apple-touch-icon">
 <link rel="icon" type="image/svg+xml" id="favicon-svg">
-<!-- Version: v10.0.137 -->
+<!-- Version: v10.0.138 -->
 <script>
-const APP_VERSION = 'v10.0.137';
+const APP_VERSION = 'v10.0.138';
 
 // ── PWA Bootstrap ──────────────────────────────────────────
 (function() {
@@ -4928,6 +4928,78 @@ self.addEventListener('fetch', e => {
 .post-call-btn:hover, .post-call-btn.active { border-color: var(--accent); color: var(--accent); }
 
 }
+
+
+  /* ── Alert Modal ── */
+  #alertModal {
+    display: none;
+    position: fixed; top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.72);
+    z-index: 99992;
+    align-items: center;
+    justify-content: center;
+  }
+  #alertModal.show { display: flex; }
+  #alertModal .confirm-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    max-width: 380px;
+    width: 90%;
+  }
+  #alertModal .confirm-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    color: var(--danger);
+  }
+  #alertModal .confirm-title.alert-warn {
+    color: var(--accent);
+  }
+  #alertModal .confirm-msg {
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  #alertModal .confirm-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  /* ── Inline Banner ── */
+  .inline-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 8px 0;
+  }
+  .inline-banner.banner-error {
+    background: rgba(220,53,69,0.12);
+    border: 1px solid rgba(220,53,69,0.3);
+    color: var(--danger);
+  }
+  .inline-banner.banner-warn {
+    background: rgba(255,171,0,0.12);
+    border: 1px solid rgba(255,171,0,0.3);
+    color: #c87800;
+  }
+  .dark .inline-banner.banner-warn { color: #ffb300; }
+  .inline-banner.banner-info {
+    background: rgba(var(--accent-rgb, 0,122,255),0.10);
+    border: 1px solid rgba(var(--accent-rgb, 0,122,255),0.25);
+    color: var(--accent);
+  }
 </style>
 </head>
 <body>
@@ -4977,7 +5049,7 @@ self.addEventListener('fetch', e => {
           <div class="menu-desc">Open chart from file</div>
         </div>
       </button>
-      <button class="menu-item" onclick="exportToJSON(); toggleMenu();">
+      <button class="menu-item" id="saveFileBtn" onclick="exportToJSON(); toggleMenu();">
         <span class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v14a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>
         <div>
           <div class="menu-title">Save to File</div>
@@ -5002,7 +5074,7 @@ self.addEventListener('fetch', e => {
           <input type="email" id="a_email" placeholder="you@example.com" inputmode="email" autocomplete="email">
           <div class="field-hint">Used as the "To:" address when you tap Email Chart to Desktop. Stored locally on this device only.</div>
         </div>
-        <button class="panel-save-btn" onclick="saveAccount()">Save</button>
+        <button class="panel-save-btn" id="saveAccountBtn" onclick="saveAccount()">Save</button>
         <div class="panel-divider"></div>
         <div class="panel-section-label">Session</div>
         <button class="panel-danger-btn" onclick="toggleMenu(); logoutUser();">
@@ -5092,7 +5164,7 @@ self.addEventListener('fetch', e => {
           </select>
           <div class="field-hint">Auto recommended. Whisper requires OpenAI key.</div>
         </div>
-        <button class="panel-save-btn" onclick="saveAppSettings()">Save</button>
+        <button class="panel-save-btn" id="saveAppSettingsBtn" onclick="saveAppSettings()">Save</button>
       </div>
       <div class="menu-divider"></div>
       <div style="padding: 10px 12px; text-align: center;">
@@ -6133,7 +6205,7 @@ self.addEventListener('fetch', e => {
       </div>
     </button>
 
-    <button class="save-btn" onclick="saveAccount()" style="margin-top:16px">Save</button>
+    <button class="save-btn" id="saveAccountBtnModal" onclick="saveAccount()" style="margin-top:16px">Save</button>
   </div>
 </div>
 
@@ -6184,7 +6256,7 @@ self.addEventListener('fetch', e => {
       </div>
     </div>
 
-    <button class="save-btn" onclick="saveAppSettings()" style="margin-top:16px">Save</button>
+    <button class="save-btn" id="saveAppSettingsBtnModal" onclick="saveAppSettings()" style="margin-top:16px">Save</button>
   </div>
 </div>
 
@@ -6764,7 +6836,7 @@ function viewProtocol(protocolId) {
     }
     
     if (!protocol) {
-      showToast('error', 'Protocol Not Found', 'Protocol ' + protocolId + ' not found');
+      console.warn('[EMS] Protocol not found:', protocolId);
       return;
     }
     
@@ -6962,24 +7034,54 @@ window.onerror = function(msg, src, line, col, err) {
   return false;
 };
 
-// ======== TOAST NOTIFICATIONS ========
+// ======== ALERT MODAL (replaces toasts) ========
+function showAlert(type, title, msg) {
+  // type: 'error' | 'warn' | 'info'
+  const modal = document.getElementById('alertModal');
+  const titleEl = document.getElementById('alertTitle');
+  const msgEl = document.getElementById('alertMsg');
+  titleEl.textContent = title;
+  titleEl.className = 'confirm-title' + (type === 'warn' ? ' alert-warn' : '');
+  msgEl.textContent = msg || '';
+  modal.classList.add('show');
+  const okBtn = document.getElementById('alertOk');
+  okBtn.onclick = () => modal.classList.remove('show');
+}
+function showInlineBanner(containerId, type, msg) {
+  // type: 'error' | 'warn' | 'info'
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  // Remove existing banner in this container
+  const existing = container.querySelector('.inline-banner');
+  if (existing) existing.remove();
+  if (!msg) return;
+  const icons = { error: '✕', warn: '⚠', info: 'ℹ' };
+  const div = document.createElement('div');
+  div.className = `inline-banner banner-${type}`;
+  div.innerHTML = `<span style="flex-shrink:0;font-size:14px;">${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  container.appendChild(div);
+}
+function flashSuccess(btnId, originalLabel, duration) {
+  duration = duration || 2000;
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  const orig = originalLabel || btn.textContent;
+  btn.textContent = '✓ Done';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }, duration);
+}
+// Legacy stub — should be unused after v10.0.138
 function showToast(type, title, msg, duration) {
-  // type: 'success' | 'error' | 'warn' | 'info'
-  duration = duration || 4000;
-  const icons = { success: '✅', error: '❌', warn: '', info: 'ℹ️' };
-  const container = document.getElementById('toastContainer');
-  const t = document.createElement('div');
-  t.className = `toast toast-${type}`;
-  t.innerHTML = `<div class="toast-icon">${icons[type]||'ℹ️'}</div><div class="toast-body"><div class="toast-title">${title}</div>${msg ? `<div class="toast-msg">${msg}</div>` : ''}</div>`;
-  t.onclick = () => dismissToast(t);
-  container.appendChild(t);
-  const timer = setTimeout(() => dismissToast(t), duration);
-  t._timer = timer;
+  if (type === 'error' || type === 'warn') {
+    showAlert(type, title, msg);
+  }
+  // success/info silently dropped — handled by flashSuccess or inline UI
 }
 function dismissToast(t) {
-  clearTimeout(t._timer);
-  t.classList.add('toast-out');
-  setTimeout(() => t.remove(), 260);
+  if (t && t.remove) t.remove();
 }
 
 // ======== CONFIRM MODAL ========
@@ -7160,14 +7262,14 @@ async function processExtractionQueue() {
   if (queueProcessing) return;
   if (!isOnline()) { updateQueueBanner(); return; }
   if (!hasAnthropicKey()) {
-    showToast('warn', 'API Key Needed', 'Add your Anthropic API key in ⚙ Crew settings to process queued extractions.');
+    showAlert('warn', 'API Key Needed', 'Add your Anthropic API key in ⚙ Crew settings to process queued extractions.');
     return;
   }
   const pending = pendingQueueItems();
   if (pending.length === 0) { updateQueueBanner(); return; }
 
   queueProcessing = true;
-  showToast('info', 'Processing Queue', `Running ${pending.length} pending extraction${pending.length !== 1 ? 's' : ''}…`);
+  // Processing started — no notification needed
 
   for (const item of pending) {
     item.status = 'processing';
@@ -7190,14 +7292,14 @@ async function processExtractionQueue() {
       item.status = 'error';
       item.error = err.message;
       saveQueue();
-      showToast('error', 'Extraction Failed', `${item.section}: ${err.message}`);
+      showAlert('error', 'Extraction Failed', `${item.section}: ${err.message}`);
     }
   }
 
   queueProcessing = false;
   const stillPending = pendingQueueItems();
   if (stillPending.length === 0) {
-    showToast('success', 'All Extractions Complete', 'All queued transcripts have been extracted into fields.');
+    // All extractions complete — bucket UI reflects this
     // Clean up done items older than 24h
     extractionQueue = extractionQueue.filter(i => i.status !== 'done' || (Date.now() - i.timestamp) < 86400000);
     saveQueue();
@@ -7756,7 +7858,7 @@ async function toggleBucketVoice() {
             finalizeLiveBucketItem(liveId);
           } catch(err) {
             finalizeLiveBucketItem(liveId);
-            showToast('error', 'Transcription Failed', err.message);
+            showAlert('error', 'Transcription Failed', err.message);
           }
         };
         mediaRecorder.start(100);
@@ -7766,12 +7868,12 @@ async function toggleBucketVoice() {
         if (label) label.style.display = 'none';
         bucketItems = bucketItems.filter(i => i.id !== liveId);
         renderBucket();
-        showToast('error', 'Microphone Error', e.message);
+        showAlert('error', 'Microphone Error', e.message);
       }
     } else {
       // WebSpeech path — live transcription card updates in real time
       if (!hasWebSpeech()) {
-        showToast('error', 'Not Supported', 'Web Speech API not available on this device.');
+        showAlert('error', 'Not Supported', 'Web Speech API is not available on this device.');
         isCapturing = false;
         btn.classList.remove('recording');
         if (label) label.style.display = 'none';
@@ -10374,7 +10476,7 @@ async function processWithAI() {
 
   } catch(err) {
     progressBar.hide();
-    showToast('error', 'AI Processing Failed', err.message);
+    showAlert('error', 'AI Processing Failed', err.message);
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalHTML;
@@ -12466,7 +12568,7 @@ async function whisperStart(section) {
 
   const openaiKey = settings.openaikey || '';
   if (!openaiKey) {
-    showToast('warn', 'No OpenAI API Key', 'Add your key in ⚙ Crew settings, or set Voice Engine to Web Speech API (free).');
+    showAlert('warn', 'No OpenAI API Key', 'Add your key in ⚙ Crew settings, or set Voice Engine to Web Speech API (free).');
     return false;
   }
 
@@ -12840,7 +12942,7 @@ async function stopSectionDictate(section, btn) {
     setDictateState(section, 'error', msg.slice(0, 60));
     const statusEl = document.getElementById('sec-status-' + section);
     if (statusEl) { statusEl.textContent = '✗ ' + msg; statusEl.className = 'sec-extract-status error'; }
-    showToast('error', 'Transcription Failed', msg);
+    showAlert('error', 'Transcription Failed', msg);
     return;
   }
 
@@ -12907,7 +13009,7 @@ async function extractSection(section) {
         setDictateState(section, 'error', result.error.slice(0, 60));
         statusEl.textContent = '✗ ' + result.error;
         statusEl.classList.add('error');
-        showToast('error', 'Extraction Failed', result.error + ' — Check Anthropic API key in ⚙ Crew settings.');
+        showAlert('error', 'Extraction Failed', result.error + ' — Check Anthropic API key in ⚙ Crew settings.');
       }
       return;
     }
@@ -12933,7 +13035,7 @@ async function extractSection(section) {
       setDictateState(section, 'error', msg.slice(0, 60));
       statusEl.textContent = '✗ ' + msg;
       statusEl.classList.add('error');
-      showToast('error', 'Extraction Failed', msg + ' — Check Anthropic API key in ⚙ Crew settings.');
+      showAlert('error', 'Extraction Failed', msg + ' — Check Anthropic API key in ⚙ Crew settings.');
     }
   }
 }
@@ -12986,7 +13088,7 @@ function updateGCSTotal() {
 
 function confirmGCS() {
   const e = gcsScores.eye, v = gcsScores.verbal, m = gcsScores.motor;
-  if (!e || !v || !m) { showToast('warn', 'Incomplete GCS', 'Please select a value for all three components.'); return; }
+  if (!e || !v || !m) { return; // GCS incomplete — selects are visible, no notification needed }
   const total = e + v + m;
   const label = `${total}`;
   const detail = `E${e}V${v}M${m}`;
@@ -13913,7 +14015,7 @@ Dictated text: "${transcript}"` }], 500),
       btn.style.display = 'block';
       status.textContent = '✗ ' + (err.message || 'Check API key in ⚙ Crew settings');
       status.classList.add('error');
-      showToast('error', 'Extraction Failed', err.message || 'Check Anthropic API key in ⚙ Crew settings.');
+      showAlert('error', 'Extraction Failed', err.message || 'Check Anthropic API key in ⚙ Crew settings.');
     }
   }
 
@@ -14345,11 +14447,11 @@ async function generateSOAP() {
   document.getElementById('errorMsg').classList.remove('visible');
 
   if (!isOnline()) {
-    showToast('warn', 'No Network', 'PCR narrative generation requires a network connection. Complete this at the station when back online.');
+    showAlert('warn', 'No Network', 'PCR narrative generation requires a network connection. Complete this at the station when back online.');
     return;
   }
   if (!hasAnthropicKey()) {
-    showToast('warn', 'API Key Needed', 'Add your Anthropic API key in ⚙ Crew settings to generate the PCR narrative.');
+    showAlert('warn', 'API Key Needed', 'Add your Anthropic API key in ⚙ Crew settings to generate the PCR narrative.');
     return;
   }
 
@@ -14731,7 +14833,7 @@ function saveAccount() {
   accountSettings.email = document.getElementById('a_email').value.trim();
   try { localStorage.setItem('ems_account', JSON.stringify(accountSettings)); } catch(e) {}
   closeAccount();
-  showToast('success', 'Account Saved', accountSettings.email ? `Email set to ${accountSettings.email}` : 'Email address cleared.');
+  flashSuccess('saveAccountBtn', 'Save'); flashSuccess('saveAccountBtnModal', 'Save');
 }
 
 // ======== APP SETTINGS ========
@@ -14761,7 +14863,7 @@ function saveAppSettings() {
   // themeMode is already updated live via setThemeMode()
   try { localStorage.setItem('ems_crew_settings', JSON.stringify(settings)); } catch(e) {}
   closeAppSettings();
-  showToast('success', 'App Settings Saved', 'API keys and voice engine updated.');
+  flashSuccess('saveAppSettingsBtn', 'Save'); flashSuccess('saveAppSettingsBtnModal', 'Save');
 }
 
 // ======== AGE CALCULATOR ========
@@ -16572,7 +16674,7 @@ async function loginUser() {
   
   document.getElementById('loginOverlay').style.display = 'none';
   setTimeout(function(){ var activeTab = document.querySelector('.tab.active'); if(activeTab) activeTab.click(); }, 300);
-  showToast('success', `Welcome back, ${username}!`, 'You are now signed in.');
+  // Sign-in success — no notification needed, UI reflects logged-in state
 
   // Check for a recoverable auto-save from the previous session
   setTimeout(() => checkAutoRecover(username, password), 600);
@@ -16632,7 +16734,7 @@ async function signupUser() {
   
   document.getElementById('loginOverlay').style.display = 'none';
   setTimeout(function(){ var activeTab = document.querySelector('.tab.active'); if(activeTab) activeTab.click(); }, 300);
-  showToast('success', `Welcome, ${username}!`, 'Account created. Your password encrypts all patient data — keep it secure.');
+  // Account created — no toast needed, UI reflects logged-in state
   // New accounts won't have a prior auto-save, but check anyway for safety
   setTimeout(() => checkAutoRecover(username, password), 600);
 }
@@ -16804,7 +16906,7 @@ function getEncryptionPassword(silent = false) {
   if (!encryptionKey) {
     // Only show warning if not silent and we're not already showing login screen
     if (!silent && document.getElementById('loginOverlay').style.display !== 'flex') {
-      showToast('warn', 'Session Expired', 'Please sign in again.');
+      showAlert('warn', 'Session Expired', 'Please sign in again.');
       showLoginScreen();
     }
     return null;
@@ -16965,7 +17067,7 @@ function collectChartData() {
 
 function restoreChartData(data) {
   if (!data || data.version !== '1.0') {
-    showToast('error', 'Import Failed', 'Invalid or incompatible chart data.');
+    showAlert('error', 'Import Failed', 'Invalid or incompatible chart data.');
     return false;
   }
   
@@ -17324,10 +17426,10 @@ async function checkAutoRecover(username, password) {
         try {
           const chartData = await decryptData(slot.data, `${username}:${password}`);
           if (restoreChartData(chartData)) {
-            showToast('success', 'Session Restored', 'Your previous chart has been loaded.');
+            // Chart restored — UI reflects this, no button flash needed
           }
         } catch (err) {
-          showToast('error', 'Restore Failed', 'Could not decrypt the auto-save — it may have been saved with a different password.');
+          showAlert('error', 'Restore Failed', 'Could not decrypt the auto-save. It may have been saved with a different password.');
         }
       }
       // Pressing Cancel simply dismisses; the auto-save slot persists until
@@ -17445,7 +17547,7 @@ async function exportToJSON() {
       const file = new File([blob], filename, { type: 'application/json' });
       try {
         await navigator.share({ files: [file], title: filename });
-        showToast('success', 'Chart Exported', `Saved as ${filename}. You will need your password to import it.`);
+        flashSuccess('saveFileBtn', 'Save to File');
       } catch (shareErr) {
         if (shareErr.name !== 'AbortError') throw shareErr;
         // User dismissed share sheet — no toast
@@ -17457,10 +17559,10 @@ async function exportToJSON() {
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-      showToast('success', 'Chart Exported', `Saved as ${filename}. You will need your password to import it.`);
+      flashSuccess('saveFileBtn', 'Save to File');
     }
   } catch (err) {
-    showToast('error', 'Export Failed', err.message);
+    showAlert('error', 'Export Failed', err.message);
   }
 }
 
@@ -17499,7 +17601,7 @@ async function handleJSONImport(event) {
                 try {
                   const altData = await decryptData(importedData.data, `${altUsername}:${altPassword}`);
                   if (restoreChartData(altData)) {
-                    showToast('success', 'Chart Imported', 'Chart imported with alternate password.');
+                    // Chart restored — UI reflects this, no button flash needed
                     setTimeout(() => {
                       const hidden = [];
                       document.querySelectorAll(
@@ -17517,7 +17619,7 @@ async function handleJSONImport(event) {
                     }, 300);
                   }
                 } catch (e) {
-                  showToast('error', 'Import Failed', 'Incorrect alternate password or corrupted file.');
+                  showAlert('error', 'Import Failed', 'Incorrect alternate password or corrupted file.');
                 }
                 event.target.value = '';
               },
@@ -17531,7 +17633,7 @@ async function handleJSONImport(event) {
         }
         
         if (restoreChartData(chartData)) {
-          showToast('success', 'Chart Imported', 'Chart imported and decrypted successfully.');
+          // Chart restored — UI reflects this, no button flash needed
           // Force-resize all textareas after import — do this from here (not inside
           // restoreChartData) so we can use a longer delay and know the DOM is settled.
           // We un-hide every hidden ancestor so scrollHeight is measurable.
@@ -17557,7 +17659,7 @@ async function handleJSONImport(event) {
         event.target.value = '';
       });
     } catch (err) {
-      showToast('error', 'File Read Error', err.message);
+      showAlert('error', 'File Read Error', err.message);
     }
     
     // Reset file input
@@ -17673,6 +17775,18 @@ function loadScript(src) {
     </div>
   </div>
 </div>
+
+<!-- ALERT MODAL -->
+<div id="alertModal">
+  <div class="confirm-box">
+    <div class="confirm-title" id="alertTitle">Alert</div>
+    <div class="confirm-msg" id="alertMsg"></div>
+    <div class="confirm-btns">
+      <button class="btn-primary" id="alertOk" style="background:var(--accent); border-color:var(--accent);">OK</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- PROTOCOLS SIDEBAR -->
 <div class="protocol-overlay" id="protocolOverlay" onclick="toggleProtocolsSidebar()"></div>

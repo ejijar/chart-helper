@@ -409,7 +409,7 @@ async function whisperStart(section) {
 
   const openaiKey = settings.openaikey || '';
   if (!openaiKey) {
-    showToast('warn', 'No OpenAI API Key', 'Add your key in ⚙ Crew settings, or set Voice Engine to Web Speech API (free).');
+    showAlert('warn', 'No OpenAI API Key', 'Add your key in ⚙ Crew settings, or set Voice Engine to Web Speech API (free).');
     return false;
   }
 
@@ -783,7 +783,7 @@ async function stopSectionDictate(section, btn) {
     setDictateState(section, 'error', msg.slice(0, 60));
     const statusEl = document.getElementById('sec-status-' + section);
     if (statusEl) { statusEl.textContent = '✗ ' + msg; statusEl.className = 'sec-extract-status error'; }
-    showToast('error', 'Transcription Failed', msg);
+    showAlert('error', 'Transcription Failed', msg);
     return;
   }
 
@@ -850,7 +850,7 @@ async function extractSection(section) {
         setDictateState(section, 'error', result.error.slice(0, 60));
         statusEl.textContent = '✗ ' + result.error;
         statusEl.classList.add('error');
-        showToast('error', 'Extraction Failed', result.error + ' — Check Anthropic API key in ⚙ Crew settings.');
+        showAlert('error', 'Extraction Failed', result.error + ' — Check Anthropic API key in ⚙ Crew settings.');
       }
       return;
     }
@@ -876,7 +876,7 @@ async function extractSection(section) {
       setDictateState(section, 'error', msg.slice(0, 60));
       statusEl.textContent = '✗ ' + msg;
       statusEl.classList.add('error');
-      showToast('error', 'Extraction Failed', msg + ' — Check Anthropic API key in ⚙ Crew settings.');
+      showAlert('error', 'Extraction Failed', msg + ' — Check Anthropic API key in ⚙ Crew settings.');
     }
   }
 }
@@ -929,7 +929,7 @@ function updateGCSTotal() {
 
 function confirmGCS() {
   const e = gcsScores.eye, v = gcsScores.verbal, m = gcsScores.motor;
-  if (!e || !v || !m) { showToast('warn', 'Incomplete GCS', 'Please select a value for all three components.'); return; }
+  if (!e || !v || !m) { return; // GCS incomplete — selects are visible, no notification needed }
   const total = e + v + m;
   const label = `${total}`;
   const detail = `E${e}V${v}M${m}`;
@@ -1856,7 +1856,7 @@ Dictated text: "${transcript}"` }], 500),
       btn.style.display = 'block';
       status.textContent = '✗ ' + (err.message || 'Check API key in ⚙ Crew settings');
       status.classList.add('error');
-      showToast('error', 'Extraction Failed', err.message || 'Check Anthropic API key in ⚙ Crew settings.');
+      showAlert('error', 'Extraction Failed', err.message || 'Check Anthropic API key in ⚙ Crew settings.');
     }
   }
 
@@ -2288,11 +2288,11 @@ async function generateSOAP() {
   document.getElementById('errorMsg').classList.remove('visible');
 
   if (!isOnline()) {
-    showToast('warn', 'No Network', 'PCR narrative generation requires a network connection. Complete this at the station when back online.');
+    showAlert('warn', 'No Network', 'PCR narrative generation requires a network connection. Complete this at the station when back online.');
     return;
   }
   if (!hasAnthropicKey()) {
-    showToast('warn', 'API Key Needed', 'Add your Anthropic API key in ⚙ Crew settings to generate the PCR narrative.');
+    showAlert('warn', 'API Key Needed', 'Add your Anthropic API key in ⚙ Crew settings to generate the PCR narrative.');
     return;
   }
 
@@ -2674,7 +2674,7 @@ function saveAccount() {
   accountSettings.email = document.getElementById('a_email').value.trim();
   try { localStorage.setItem('ems_account', JSON.stringify(accountSettings)); } catch(e) {}
   closeAccount();
-  showToast('success', 'Account Saved', accountSettings.email ? `Email set to ${accountSettings.email}` : 'Email address cleared.');
+  flashSuccess('saveAccountBtn', 'Save'); flashSuccess('saveAccountBtnModal', 'Save');
 }
 
 // ======== APP SETTINGS ========
@@ -2704,7 +2704,7 @@ function saveAppSettings() {
   // themeMode is already updated live via setThemeMode()
   try { localStorage.setItem('ems_crew_settings', JSON.stringify(settings)); } catch(e) {}
   closeAppSettings();
-  showToast('success', 'App Settings Saved', 'API keys and voice engine updated.');
+  flashSuccess('saveAppSettingsBtn', 'Save'); flashSuccess('saveAppSettingsBtnModal', 'Save');
 }
 
 // ======== AGE CALCULATOR ========
